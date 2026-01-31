@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MentMinds - Find Your Mentor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300;400;600;700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #E67E22;
+            --primary-dark: #D35400;
+            --secondary: #27AE60;
+            --accent: #F39C12;
+            --bg-light: #FDF8F3;
+            --bg-white: #FFFFFF;
+            --text-dark: #2C3E50;
+            --text-gray: #7F8C8D;
+            --border: #ECF0F1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-dark);
+            background: var(--bg-light);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Fraunces', serif;
+            font-weight: 700;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--bg-white);
+            padding: 1.2rem 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Fraunces', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 120px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            overflow-y: auto;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 1rem;
+        }
+
+        .profile-section h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .profile-section p {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .profile-form {
+            margin-top: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            background: var(--bg-light);
+            color: var(--primary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-header {
+            margin-bottom: 2rem;
+        }
+
+        .content-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .content-header p {
+            color: var(--text-gray);
+            font-size: 1.05rem;
+        }
+
+        /* Mentor Cards */
+        .mentors-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .mentor-card {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1.5rem;
+            align-items: start;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .mentor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border-color: var(--primary);
+        }
+
+        .mentor-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .mentor-info {
+            flex: 1;
+        }
+
+        .mentor-header {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .mentor-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
+        }
+
+        .match-score {
+            background: linear-gradient(135deg, var(--secondary), #27AE60);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .mentor-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .mentor-domains {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .domain-tag {
+            background: white;
+            color: var(--primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid var(--primary);
+        }
+
+        .mentor-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            color: var(--text-gray);
+        }
+
+        .mentor-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .btn-connect {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3);
+        }
+
+        .btn-view {
+            padding: 0.8rem 1.5rem;
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-view:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .empty-state p {
+            color: var(--text-gray);
+        }
+
+        /* Chat Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-gray);
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .chat-container {
+            margin-top: 2rem;
+        }
+
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: var(--bg-light);
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+
+        .message.sent {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.received {
+            background: white;
+            color: var(--text-dark);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-send {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+
+            .main-content {
+                order: 1;
+                min-height: 500px;
+            }
+
+            .mentor-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .mentor-avatar {
+                margin: 0 auto;
+            }
+
+            .mentor-actions {
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="mentminds_website.html" class="logo">Ment<span>Minds</span></a>
+            <div style="display: flex; gap: 1.5rem; align-items: center;">
+                <a href="mentminds_website.html" style="text-decoration: none; color: var(--text-dark); font-weight: 500;">← Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="profile-avatar">👤</div>
+                <h3>Welcome!</h3>
+                <p>Tell us about yourself to find the perfect mentor</p>
+            </div>
+
+            <form class="profile-form" id="menteeForm">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="name" placeholder="Enter your name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Experience Level</label>
+                    <select id="level" required>
+                        <option value="">Select level</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>What do you want to learn?</label>
+                    <select id="domains" multiple size="4" required>
+                        <option value="Data Science">Data Science</option>
+                        <option value="Machine Learning">Machine Learning</option>
+                        <option value="Software Engineering">Software Engineering</option>
+                        <option value="Web Development">Web Development</option>
+                        <option value="Mobile Development">Mobile Development</option>
+                        <option value="Product Management">Product Management</option>
+                        <option value="UX Design">UX Design</option>
+                        <option value="Business Analytics">Business Analytics</option>
+                        <option value="Leadership">Leadership</option>
+                        <option value="Career Development">Career Development</option>
+                    </select>
+                    <small style="color: var(--text-gray); font-size: 0.85rem;">Hold Ctrl/Cmd to select multiple</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Your Goals</label>
+                    <textarea id="goals" placeholder="What do you hope to achieve?" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Industry</label>
+                    <select id="industry" required>
+                        <option value="">Select industry</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Education">Education</option>
+                        <option value="E-commerce">E-commerce</option>
+                        <option value="Media">Media</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Learning Style</label>
+                    <select id="style" required>
+                        <option value="">Select style</option>
+                        <option value="structured">Structured</option>
+                        <option value="flexible">Flexible</option>
+                        <option value="hands-on">Hands-on</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Availability (hours/month)</label>
+                    <input type="number" id="availability" min="5" max="40" value="10" required>
+                </div>
+
+                <button type="submit" class="btn" id="findBtn">
+                    🔍 Find My Mentors
+                </button>
+            </form>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Your Recommended Mentors</h2>
+                <p>AI-powered matching based on your profile and goals</p>
+            </div>
+
+            <div id="mentorsContainer">
+                <div class="empty-state">
+                    <div class="empty-icon">🎯</div>
+                    <h3>Ready to Find Your Mentor?</h3>
+                    <p>Fill out your profile on the left and click "Find My Mentors" to get personalized recommendations powered by AI.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="modal" id="chatModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeChat()">×</button>
+            <h2 id="chatMentorName">Chat with Mentor</h2>
+            <p style="color: var(--text-gray); margin-bottom: 1rem;">Start your mentorship journey!</p>
+            
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message received">
+                        Hello! I'm excited to be your mentor. How can I help you today? 👋
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="messageInput" placeholder="Type your message...">
+                    <button class="btn-send" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration - UPDATE THIS WITH YOUR API URL
+        const API_URL = 'http://localhost:5000/api';
+        
+        let currentMentorId = null;
+        let menteeData = null;
+
+        // Form submission
+        document.getElementById('menteeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const findBtn = document.getElementById('findBtn');
+            findBtn.disabled = true;
+            findBtn.textContent = '🔍 Searching...';
+            
+            // Get selected domains
+            const domainsSelect = document.getElementById('domains');
+            const selectedDomains = Array.from(domainsSelect.selectedOptions).map(opt => opt.value);
+            
+            // Create mentee data
+            menteeData = {
+                name: document.getElementById('name').value,
+                desired_domains: selectedDomains,
+                current_level: document.getElementById('level').value,
+                goals: document.getElementById('goals').value,
+                industry: document.getElementById('industry').value,
+                preferred_style: document.getElementById('style').value,
+                availability_hours: parseInt(document.getElementById('availability').value),
+                current_skills: [], // Empty for new mentees
+                location: 'Lagos', // Default
+                learning_pace: 'moderate', // Default
+                active: true
+            };
+            
+            await findMentors();
+            
+            findBtn.disabled = false;
+            findBtn.textContent = '🔍 Find My Mentors';
+        });
+
+        async function findMentors() {
+            const container = document.getElementById('mentorsContainer');
+            
+            // Show loading
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loader"></div>
+                    <h3>Finding Your Perfect Mentors...</h3>
+                    <p style="color: var(--text-gray);">Our AI is analyzing over 200 mentors to find your best matches</p>
+                </div>
+            `;
+
+            try {
+                // First, create the mentee in the database (in real app)
+                // For demo, we'll use a mock mentee_id
+                const mockMenteeId = 161;
+                
+                // Get recommendations from API
+                const response = await fetch(`${API_URL}/recommend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mentee_id: mockMenteeId,
+                        top_k: 5
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                const data = await response.json();
+                displayMentors(data.recommendations);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // Show error or demo data
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <h3>Unable to Connect to API</h3>
+                        <p style="color: var(--text-gray); margin-bottom: 1rem;">
+                            Make sure your API is running at ${API_URL}
+                        </p>
+                        <p style="color: var(--text-gray);">
+                            <strong>To start the API:</strong><br>
+                            1. Navigate to your project folder<br>
+                            2. Run: <code style="background: var(--bg-light); padding: 0.2rem 0.5rem; border-radius: 4px;">python api.py</code>
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayMentors(mentors) {
+            const container = document.getElementById('mentorsContainer');
+            
+            if (!mentors || mentors.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <h3>No Mentors Found</h3>
+                        <p>Try adjusting your preferences to find more matches.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = `
+                <div class="mentors-grid">
+                    ${mentors.map(mentor => `
+                        <div class="mentor-card">
+                            <div class="mentor-avatar">👨‍🏫</div>
+                            <div class="mentor-info">
+                                <div class="mentor-header">
+                                    <div>
+                                        <div class="mentor-name">${mentor.mentor_name}</div>
+                                    </div>
+                                    <div class="match-score">
+                                        ⭐ ${(mentor.match_score * 100).toFixed(0)}% Match
+                                    </div>
+                                </div>
+                                
+                                <div class="mentor-meta">
+                                    <div class="meta-item">
+                                        💼 ${mentor.experience_years} years experience
+                                    </div>
+                                    <div class="meta-item">
+                                        ⭐ ${mentor.rating.toFixed(1)}/5.0
+                                    </div>
+                                    <div class="meta-item">
+                                        🕒 ${mentor.availability_hours} hrs/month
+                                    </div>
+                                </div>
+                                
+                                <div class="mentor-domains">
+                                    ${mentor.domains.slice(0, 3).map(domain => 
+                                        `<span class="domain-tag">${domain}</span>`
+                                    ).join('')}
+                                </div>
+                                
+                                <div class="mentor-stats">
+                                    <div class="stat-item">
+                                        🎯 ${(mentor.match_details.domain_overlap * 100).toFixed(0)}% domain overlap
+                                    </div>
+                                    <div class="stat-item">
+                                        ${mentor.match_details.style_match ? '✅' : '❌'} Style match
+                                    </div>
+                                    <div class="stat-item">
+                                        🤝 ${(mentor.match_details.availability_compatibility * 100).toFixed(0)}% availability
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mentor-actions">
+                                <button class="btn-connect" onclick="openChat(${mentor.mentor_id}, '${mentor.mentor_name}')">
+                                    💬 Connect
+                                </button>
+                                <button class="btn-view" onclick="viewProfile(${mentor.mentor_id})">
+                                    👤 View Profile
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function openChat(mentorId, mentorName) {
+            currentMentorId = mentorId;
+            document.getElementById('chatMentorName').textContent = `Chat with ${mentorName}`;
+            document.getElementById('chatModal').classList.add('active');
+        }
+
+        function closeChat() {
+            document.getElementById('chatModal').classList.remove('active');
+            document.getElementById('messageInput').value = '';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            // Add sent message
+            const sentMsg = document.createElement('div');
+            sentMsg.className = 'message sent';
+            sentMsg.textContent = message;
+            messagesContainer.appendChild(sentMsg);
+            
+            // Clear input
+            input.value = '';
+            
+            // Simulate mentor response
+            setTimeout(() => {
+                const receivedMsg = document.createElement('div');
+                receivedMsg.className = 'message received';
+                receivedMsg.textContent = "Thanks for your message! I'll get back to you soon. Looking forward to our mentorship journey! 😊";
+                messagesContainer.appendChild(receivedMsg);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 1000);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function viewProfile(mentorId) {
+            alert(`Viewing profile for mentor ID: ${mentorId}\n\nFull profile view coming soon!`);
+        }
+
+        // Enter key to send message
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Close modal on outside click
+        document.getElementById('chatModal').addEventListener('click', (e) => {
+            if (e.target.id === 'chatModal') {
+                closeChat();
+            }
+        });
+    </script>
+</body>
+</html>
