@@ -1,7 +1,3 @@
-"""
-Inference Script: Make predictions with trained model
-Use this to recommend mentors for mentees
-"""
 
 import pandas as pd
 import numpy as np
@@ -64,9 +60,9 @@ def load_model_and_data():
     try:
         model = joblib.load('mentor_matching_model.pkl')
         feature_cols = joblib.load('feature_columns.pkl')
-        print("✓ Model loaded")
+        print(" Model loaded")
     except FileNotFoundError:
-        print("❌ Model files not found. Train the model first:")
+        print(" Model files not found. Train the model first:")
         print("   python ml_pipeline.py")
         sys.exit(1)
     
@@ -77,7 +73,7 @@ def load_model_and_data():
         mentors_df = pd.read_sql_query(text("SELECT * FROM mentors WHERE active = TRUE"), conn)
         mentees_df = pd.read_sql_query(text("SELECT * FROM mentees WHERE active = TRUE"), conn)
     
-    print(f"✓ Loaded {len(mentors_df)} mentors, {len(mentees_df)} mentees")
+    print(f" Loaded {len(mentors_df)} mentors, {len(mentees_df)} mentees")
     
     return model, feature_cols, mentors_df, mentees_df
 
@@ -100,7 +96,7 @@ def recommend_mentors(mentee_id, model, feature_cols, mentors_df, mentees_df, to
     # Get mentee
     mentee = mentees_df[mentees_df['mentee_id'] == mentee_id]
     if len(mentee) == 0:
-        print(f"❌ Mentee ID {mentee_id} not found")
+        print(f" Mentee ID {mentee_id} not found")
         return None
     
     mentee = mentee.iloc[0]
@@ -240,3 +236,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
