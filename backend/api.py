@@ -1,10 +1,4 @@
-"""
-Optimized Flask API for Mentor-Mentee Matching System
-Performance improvements: caching, connection pooling, batch loading
 
-Install additional packages:
-pip install flask flask-cors redis flask-caching
-"""
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -21,10 +15,10 @@ import time
 app = Flask(__name__)
 CORS(app)
 
-# Configure caching - REDIS (production) or SIMPLE (development)
+
 cache_config = {
-    'CACHE_TYPE': 'SimpleCache',  # Use 'RedisCache' for production
-    'CACHE_DEFAULT_TIMEOUT': 300   # 5 minutes
+    'CACHE_TYPE': 'SimpleCache',  
+    'CACHE_DEFAULT_TIMEOUT': 300  
 }
 app.config.from_mapping(cache_config)
 cache = Cache(app)
@@ -38,16 +32,16 @@ if not DB_URL:
 MODEL_PATH = 'mentor_matching_model.pkl'
 FEATURE_COLS_PATH = 'feature_columns.pkl'
 
-# Global variables for model and data (loaded once at startup)
+# Global variables for model and data 
 model = None
 feature_cols = None
 mentors_df = None
 mentees_df = None
 
-# Database connection pool for better performance
+
 engine = None
 
-# Feature engineering functions (optimized with numpy)
+# Feature engineering functions 
 def calculate_domain_overlap(mentor_domains, mentee_domains):
     if not mentor_domains or not mentee_domains:
         return 0.0
@@ -128,7 +122,7 @@ def load_resources():
         feature_cols = joblib.load(FEATURE_COLS_PATH)
         print(f" Model loaded: {type(model).__name__}")
     except FileNotFoundError:
-        print(" Model files not found. Train model first: python ml_pipeline_nigeria.py")
+        print(" Model files not found. Train model first: python ml_pipeline.py")
         return False
     
     # Create database engine with connection pooling
@@ -136,10 +130,10 @@ def load_resources():
         engine = create_engine(
             DB_URL,
             poolclass=QueuePool,
-            pool_size=10,        # Keep 10 connections ready
-            max_overflow=20,     # Allow up to 30 total
-            pool_pre_ping=True,  # Verify connections before use
-            pool_recycle=3600    # Recycle connections after 1 hour
+            pool_size=10,        
+            max_overflow=20,    
+            pool_pre_ping=True,  
+            pool_recycle=3600   
         )
         
         # Load data into memory for faster access
@@ -166,10 +160,10 @@ def load_resources():
     
     return True
 
-# API Endpoints with caching
+# API Endpoints 
 
 @app.route('/api/health', methods=['GET'])
-@cache.cached(timeout=60)  # Cache for 1 minute
+@cache.cached(timeout=60)  
 def health_check():
     """Health check endpoint"""
     return jsonify({
@@ -180,13 +174,13 @@ def health_check():
     })
 
 @app.route('/api/mentors', methods=['GET'])
-@cache.cached(timeout=300)  # Cache for 5 minutes
+@cache.cached(timeout=300)  
 def get_mentors():
     """Get all active mentors (cached)"""
     if mentors_df is None:
         return jsonify({'error': 'Data not loaded'}), 500
     
-    # Convert to dict (use records for faster serialization)
+    # Convert to dict 
     mentors_list = mentors_df.to_dict('records')
     
     # Handle numpy arrays
@@ -256,7 +250,7 @@ def recommend_mentors():
     
     mentee = mentee.iloc[0]
     
-    # Batch process all mentors at once (much faster)
+    # Batch process all mentors at once 
     features_df = create_features_batch(mentee, mentors_df)
     feature_matrix = features_df[feature_cols].values
     
@@ -301,12 +295,12 @@ def recommend_mentors():
     }
     
     # Cache the result
-    cache.set(cache_key, result, timeout=300)  # Cache for 5 minutes
+    cache.set(cache_key, result, timeout=300)  
     
     return jsonify(result)
 
 @app.route('/api/match-score', methods=['POST'])
-@cache.memoize(timeout=300)  # Cache individual match scores
+@cache.memoize(timeout=300) 
 def get_match_score():
     """Get match score for a specific mentor-mentee pair (cached)"""
     if model is None or mentors_df is None or mentees_df is None:
@@ -356,7 +350,7 @@ def get_match_score():
         }
     })
 
-# Clear cache endpoint (admin only in production)
+# Clear cache endpoint 
 @app.route('/api/cache/clear', methods=['POST'])
 def clear_cache():
     """Clear all cached data"""
@@ -381,27 +375,13 @@ if __name__ == '__main__':
         print("\n Failed to load resources. Exiting.")
         exit(1)
     
-    print("\n✓ API ready with optimizations:")
-    print("  • Connection pooling (10 base + 20 overflow)")
-    print("  • In-memory data caching")
-    print("  • Batch predictions")
-    print("  • Response caching (5 min)")
-    print("\nEndpoints:")
-    print("  GET  /api/health          - Health check")
-    print("  GET  /api/mentors         - List all mentors (cached)")
-    print("  GET  /api/mentees         - List all mentees (cached)")
-    print("  POST /api/recommend       - Get recommendations (cached)")
-    print("  POST /api/match-score     - Get match score (cached)")
-    print("  POST /api/cache/clear     - Clear cache")
-    
-    print("\n" + "="*60)
-    print("Starting optimized server on http://localhost:5000")
-    print("="*60)
+   
     
     # Run server with optimized settings
     app.run(
-        debug=False,          # Disable debug mode for production
+        debug=False,         
         host='0.0.0.0',
         port=5000,
-        threaded=True         # Enable threading for concurrent requests
+        threaded=True        
+
     )
