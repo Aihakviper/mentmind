@@ -88,11 +88,11 @@ def load_data(db_url):
     with engine.connect() as conn:
         # Load mentors
         mentors_df = pd.read_sql_query(text("SELECT * FROM mentors WHERE active = TRUE"), conn)
-        print(f"✓ Loaded {len(mentors_df)} active mentors")
+        print(f" Loaded {len(mentors_df)} active mentors")
         
         # Load mentees
         mentees_df = pd.read_sql_query(text("SELECT * FROM mentees WHERE active = TRUE"), conn)
-        print(f"✓ Loaded {len(mentees_df)} active mentees")
+        print(f" Loaded {len(mentees_df)} active mentees")
         
         # Load interactions
         interactions_df = pd.read_sql_query(text("""
@@ -101,7 +101,7 @@ def load_data(db_url):
             AND mentor_accepted IS NOT NULL 
             AND mentee_accepted IS NOT NULL
         """), conn)
-        print(f"✓ Loaded {len(interactions_df)} interactions")
+        print(f" Loaded {len(interactions_df)} interactions")
     
     return mentors_df, mentees_df, interactions_df
 
@@ -166,11 +166,11 @@ def create_features(interactions_df, mentors_df, mentees_df):
             features_list.append(features)
             
         except Exception as e:
-            print(f"⚠ Error processing interaction {row['interaction_id']}: {e}")
+            print(f" Error processing interaction {row['interaction_id']}: {e}")
             continue
     
     features_df = pd.DataFrame(features_list)
-    print(f"✓ Created {len(features_df)} feature vectors")
+    print(f" Created {len(features_df)} feature vectors")
     
     return features_df
 
@@ -223,7 +223,7 @@ def train_models(X_train, X_test, y_train, y_test):
         'scaler': scaler
     }
     
-    print("✓ Logistic Regression trained")
+    print(" Logistic Regression trained")
     
     # Random Forest
     print("\n2. Training Random Forest...")
@@ -244,7 +244,7 @@ def train_models(X_train, X_test, y_train, y_test):
         'probabilities': y_pred_proba_rf
     }
     
-    print("✓ Random Forest trained")
+    print(" Random Forest trained")
     
     # Try XGBoost if available
     try:
@@ -269,10 +269,10 @@ def train_models(X_train, X_test, y_train, y_test):
             'probabilities': y_pred_proba_xgb
         }
         
-        print("✓ XGBoost trained")
+        print(" XGBoost trained")
         
     except ImportError:
-        print("\n⚠ XGBoost not available (install with: pip install xgboost)")
+        print("\n XGBoost not available (install with: pip install xgboost)")
     
     return results
 
@@ -315,7 +315,7 @@ def evaluate_models(results, y_test):
     
     # Find best model
     best_model_name = comparison_df.loc[comparison_df['ROC-AUC'].idxmax(), 'Model']
-    print(f"\n🏆 Best Model: {best_model_name}")
+    print(f"\n Best Model: {best_model_name}")
     
     return comparison_df, best_model_name
 
@@ -332,19 +332,19 @@ def save_model(model_name, results, feature_cols):
     
     if 'scaler' in model_data:
         joblib.dump(model_data['scaler'], 'feature_scaler.pkl')
-        print("✓ Saved feature_scaler.pkl")
+        print(" Saved feature_scaler.pkl")
     
-    print("✓ Saved mentor_matching_model.pkl")
-    print("✓ Saved feature_columns.pkl")
+    print(" Saved mentor_matching_model.pkl")
+    print(" Saved feature_columns.pkl")
     
     print(f"\nModel Type: {model_name}")
     print("Ready for deployment!")
 
 def main():
     """Main pipeline execution"""
-    print("\n" + "="*80)
+   
     print(" "*20 + "MENTOR-MENTEE MATCHING ML PIPELINE")
-    print("="*80)
+   
     
     # Load data
     mentors_df, mentees_df, interactions_df = load_data(DB_URL)
@@ -356,9 +356,9 @@ def main():
     feature_cols = analyze_features(features_df)
     
     # Prepare data
-    print("\n" + "="*60)
+    
     print("PREPARING DATA")
-    print("="*60)
+  
     
     X = features_df[feature_cols]
     y = features_df['successful_match'].astype(int)
@@ -381,14 +381,11 @@ def main():
     # Save best model
     save_model(best_model_name, results, feature_cols)
     
-    print("\n" + "="*80)
-    print("✓ PIPELINE COMPLETE!")
-    print("="*80)
-    print("\nNext steps:")
-    print("  1. Review model performance metrics above")
-    print("  2. Use the saved model for predictions")
-    print("  3. Create an API endpoint for production")
-    print("  4. Implement feedback loop for continuous improvement")
+   
+    print(" PIPELINE COMPLETE!")
+   
+   
 
 if __name__ == "__main__":
     main()
+
