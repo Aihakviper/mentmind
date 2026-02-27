@@ -42,11 +42,10 @@ load_dotenv()
 
 
 DB_URL = os.getenv('DATABASE_URL')          
-MODEL_PATH        = os.getenv('MODEL_PATH', 'mentmind/model/mentor_matching_modelv2.pkl')
-FEATURE_COLS_PATH = os.getenv('FEATURE_COLS_PATH', 'mentmind/model/feature_columnsv2.pkl')
-TFIDF_PATH        = os.getenv('TFIDF_PATH', 'mentmind/model/tfidf_vectorizerv2.pkl')
-SBERT_VECS_PATH   = os.getenv('SBERT_VECS_PATH', 'mentmind/model/mentor_sbert_vecsv2.pkl') 
-
+MODEL_PATH        = os.getenv('MODEL_PATH',        '../model/mentor_matching_modelv2.pkl')
+FEATURE_COLS_PATH = os.getenv('FEATURE_COLS_PATH', '../model/feature_columnsv2.pkl')
+TFIDF_PATH        = os.getenv('TFIDF_PATH',        '../model/tfidf_vectorizerv2.pkl')
+SBERT_VECS_PATH   = os.getenv('SBERT_VECS_PATH',   '../model/mentor_sbert_vecsv2.pkl')
 # Global state
 model = None
 feature_cols = None
