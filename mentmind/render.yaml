@@ -12,14 +12,14 @@ services:
         fromDatabase:
           name: mentminds-db
           property: connectionString
-      - key: MODEL_PATH
-        value: model/mentor_matching_modelv2.pkl
+     - key: MODEL_PATH
+        value: ../model/mentor_matching_modelv2.pkl
       - key: FEATURE_COLS_PATH
-        value: model/feature_columnsv2.pkl
+        value: ../model/feature_columnsv2.pkl
       - key: TFIDF_PATH
-        value: model/tfidf_vectorizerv2.pkl
+        value: ../model/tfidf_vectorizerv2.pkl
       - key: SBERT_VECS_PATH
-        value: model/mentor_sbert_vecsv2.pkl
+        value: ../model/mentor_sbert_vecsv2.pkl
 
 databases:
   - name: mentminds-db
