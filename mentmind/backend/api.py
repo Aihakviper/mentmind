@@ -261,6 +261,22 @@ def load_resources():
 
         mentors_df['mentor_id'] = mentors_df['mentor_id'].astype('int32')
         mentees_df['mentee_id'] = mentees_df['mentee_id'].astype('int32')
+       import json
+        def parse_list(val):
+            if isinstance(val, list): return val
+            if isinstance(val, str):
+                try: return json.loads(val)
+                except: return [v.strip() for v in val.split(',') if v.strip()]
+            return []
+
+        for col in ['domains', 'skills']:
+            mentors_df[col] = mentors_df[col].apply(parse_list)
+        for col in ['desired_domains', 'current_skills']:
+            mentees_df[col] = mentees_df[col].apply(parse_list)
+
+        mentors_df['bio']   = mentors_df['bio'].fillna('').astype(str)
+        if 'goals' in mentees_df.columns:
+            mentees_df['goals'] = mentees_df['goals'].fillna('').astype(str)
         print(f"   Loaded {len(mentors_df)} mentors, {len(mentees_df)} mentees from DB")
     except Exception as e:
         print(f"    Database connection failed: {e}")
