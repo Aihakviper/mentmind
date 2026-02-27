@@ -34,10 +34,10 @@ load_dotenv()
 
 
 DB_URL = os.getenv('DATABASE_URL')          
-MODEL_PATH        = os.getenv('MODEL_PATH',        'C:\\Users\\Dell\\Documents\\recommendation system\\model\\mentor_matching_modelv2.pkl')
-FEATURE_COLS_PATH = os.getenv('FEATURE_COLS_PATH', 'C:\\Users\\Dell\\Documents\\recommendation system\\model\\feature_columnsv2.pkl')
-TFIDF_PATH        = os.getenv('TFIDF_PATH',        'C:\\Users\\Dell\\Documents\\recommendation system\\model\\tfidf_vectorizerv2.pkl')
-SBERT_VECS_PATH   = os.getenv('SBERT_VECS_PATH',   'C:\\Users\\Dell\\Documents\\recommendation system\\model\\mentor_sbert_vecsv2.pkl') 
+MODEL_PATH        = os.getenv('MODEL_PATH',        './model/mentor_matching_modelv2.pkl')
+FEATURE_COLS_PATH = os.getenv('FEATURE_COLS_PATH', './model/feature_columnsv2.pkl')
+TFIDF_PATH        = os.getenv('TFIDF_PATH',        './model/tfidf_vectorizerv2.pkl')
+SBERT_VECS_PATH   = os.getenv('SBERT_VECS_PATH',   './model/mentor_sbert_vecsv2.pkl') 
 
 # Global state
 model = None
@@ -517,3 +517,4 @@ if __name__ == '__main__':
 
 
     app.run(debug=True, host='0.0.0.0', port=5000, threaded=True)
+
