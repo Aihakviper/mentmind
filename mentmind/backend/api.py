@@ -27,6 +27,14 @@ app.config.from_mapping(cache_config)
 cache = Cache(app)
 limiter = Limiter(get_remote_address, app=app)
 
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri="memory://"
+)
+
 # Configuration
 
 from dotenv import load_dotenv
@@ -45,13 +53,11 @@ feature_cols = None
 tfidf_vectorizer   = None
 mentor_sbert_vecs  = None
 sbert_model = None
-mentors_df = None   # Loaded from DB at startup (if DB available)
-mentees_df = None   # Loaded from DB at startup (if DB available)
+mentors_df = None   
+mentees_df = None   
 engine = None
 
-# --------------------------------------------------------------------------- #
 # Feature engineering
-# --------------------------------------------------------------------------- #
 
 def calculate_domain_overlap(mentor_domains, mentee_domains):
     if not mentor_domains or not mentee_domains:
@@ -261,7 +267,7 @@ def load_resources():
 
         mentors_df['mentor_id'] = mentors_df['mentor_id'].astype('int32')
         mentees_df['mentee_id'] = mentees_df['mentee_id'].astype('int32')
-       import json
+        import json
         def parse_list(val):
             if isinstance(val, list): return val
             if isinstance(val, str):
@@ -509,6 +515,10 @@ def get_match_score():
 def clear_cache():
     cache.clear()
     return jsonify({'message': 'Cache cleared'})
+
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    return jsonify({'error': 'Too many requests. Please wait a minute and try again.', 'retry_after': '60s'}), 429
 
 
 @app.errorhandler(404)
