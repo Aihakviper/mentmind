@@ -1,22 +1,13 @@
-# Force CPU-only versions to stay under 512MB RAM
---index-url https://download.pytorch.org/whl/cpu
-
-# Core Web Server
 flask==3.0.3
 flask-cors==4.0.1
 flask-caching==2.3.0
+flask-limiter==3.8.0
 gunicorn==22.0.0
 python-dotenv==1.0.1
-
-# Database
 sqlalchemy==2.0.31
 psycopg2-binary==2.9.9
-
-# Data & AI (Order matters for dependencies)
 numpy==1.26.4
 pandas==2.2.2
-scikit-learn==1.5.1
+scikit-learn==1.6.1
 xgboost==2.1.1
 joblib==1.4.2
-torch==2.2.1
-sentence-transformers==3.0.1
