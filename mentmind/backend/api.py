@@ -17,7 +17,18 @@ from flask_limiter.util import get_remote_address
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "https://mentor-recommendation-system.vercel.app",
+            "http://localhost:5500",
+            "http://127.0.0.1:5500",
+            "http://localhost:3000"
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+}))
 
 cache_config = {
     'CACHE_TYPE': 'SimpleCache',
@@ -363,6 +374,9 @@ def recommend_mentors():
       Mode B (existing mentee):
         { "mentee_id": 42, "top_k": 5 }
     """
+
+    if request.method == 'OPTIONS':
+        return '', 204
     if model is None:
         return jsonify({'error': 'Model not loaded'}), 500
 
