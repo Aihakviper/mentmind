@@ -20,10 +20,8 @@ app = Flask(__name__)
 CORS(app, resources={
     r"/api/*": {
         "origins": [
-            "https://mentor-recommendation-system.vercel.app",
-            "http://localhost:5500",
-            "http://127.0.0.1:5500",
-            "http://localhost:3000"
+            "https://mentmind.vercel.app",
+            
         ],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
@@ -36,9 +34,8 @@ cache_config = {
 }
 app.config.from_mapping(cache_config)
 cache = Cache(app)
-limiter = Limiter(get_remote_address, app=app)
 
-
+# Single limiter instance only
 limiter = Limiter(
     get_remote_address,
     app=app,
@@ -47,16 +44,15 @@ limiter = Limiter(
 )
 
 # Configuration
-
 from dotenv import load_dotenv
 load_dotenv()
-
 
 DB_URL = os.getenv('DATABASE_URL')          
 MODEL_PATH        = os.getenv('MODEL_PATH',        '../model/mentor_matching_modelv2.pkl')
 FEATURE_COLS_PATH = os.getenv('FEATURE_COLS_PATH', '../model/feature_columnsv2.pkl')
 TFIDF_PATH        = os.getenv('TFIDF_PATH',        '../model/tfidf_vectorizerv2.pkl')
 SBERT_VECS_PATH   = os.getenv('SBERT_VECS_PATH',   '../model/mentor_sbert_vecsv2.pkl')
+
 # Global state
 model = None
 feature_cols = None
@@ -87,7 +83,7 @@ def calculate_availability_compatibility(mentor_hours, mentee_hours):
         diff = abs(float(mentor_hours) - float(mentee_hours))
         return max(0.0, 1.0 - (diff / 30.0))
     except (TypeError, ValueError):
-        return 0.5  # neutral fallback
+        return 0.5
 
 def style_match(mentor_style, mentee_style):
     return 1 if mentor_style == mentee_style else 0
@@ -120,14 +116,13 @@ def bio_goal_tfidf_sim(mentor_bio: str, mentee_goals: str) -> float:
     return float(cosine_similarity(m_vec, e_vec)[0, 0])
 
 def bio_goal_sbert_sim(mentor_idx: int, mentee_goals: str) -> float:
-    """Uses pre-computed mentor SBERT vecs; encodes mentee goals on the fly."""
     if mentor_sbert_vecs is None or not mentee_goals:
         return bio_goal_tfidf_sim(
             mentors_df.iloc[mentor_idx].get('bio', ''), mentee_goals
         )
     try:
         from sentence_transformers import SentenceTransformer
-        _sbert =  sbert_model if sbert_model else SentenceTransformer('all-MiniLM-L6-v2')
+        _sbert = sbert_model if sbert_model else SentenceTransformer('all-MiniLM-L6-v2')
         e_emb  = _sbert.encode([mentee_goals], convert_to_numpy=True)
         return float(cosine_similarity(
             mentor_sbert_vecs[mentor_idx].reshape(1, -1), e_emb)[0, 0])
@@ -156,17 +151,13 @@ def experience_gap_score(experience_years: float, current_level: str) -> float:
     else:                             return max(0.4, 1.0 - (experience_years - hi) / 20)
 
 def create_features_batch(mentee, mentors_subset):
-    """Build feature DataFrame for every mentor in mentors_subset vs. one mentee."""
     features_list = []
     level_map = {'beginner': 1, 'intermediate': 2, 'advanced': 3}
     mentee_level_numeric = level_map.get(mentee.get('current_level'), 2)
     mentee_goals = str(mentee.get('goals', ''))
-    
-
-       
 
     for pos, mentor in mentors_subset.iterrows():
-        mentor_bio    = str(mentor.get('bio', ''))
+        mentor_bio     = str(mentor.get('bio', ''))
         mentor_domains = mentor.get('domains') or []
         mentor_skills  = mentor.get('skills')  or []
         if isinstance(mentor_domains, np.ndarray):
@@ -192,9 +183,10 @@ def create_features_batch(mentee, mentors_subset):
                 mentor.get('industry'), mentee.get('industry')
             ),
             'mentor_experience_years': mentor.get('experience_years', 0),
-            'experience_gap_score':  experience_gap_score(
-                                         float(mentor.get('experience_years', 0)),
-                                         mentee.get('current_level', 'intermediate')),
+            'experience_gap_score': experience_gap_score(
+                float(mentor.get('experience_years', 0)),
+                mentee.get('current_level', 'intermediate')
+            ),
             'mentee_level_numeric':    mentee_level_numeric,
             'mentor_rating':           mentor.get('rating', 3.0),
             'mentor_acceptance_rate':  mentor.get('acceptance_rate', 0.5),
@@ -202,21 +194,17 @@ def create_features_batch(mentee, mentors_subset):
             'mentor_domain_count': len(mentor_domains),
             'mentee_domain_count': len(mentee.get('desired_domains') or []),
             'mentor_skill_count':  len(mentor_skills),
-            'mentee_skill_count':    len(mentee.get('current_skills') or []),
-            
-            'bio_goal_tfidf_sim':    bio_goal_tfidf_sim(mentor_bio, mentee_goals),
-            'bio_goal_sbert_sim':    bio_goal_sbert_sim(pos, mentee_goals),
-            'bio_domain_coverage':   bio_domain_coverage(mentor_bio,
-                                         mentee.get('desired_domains') or []),
-            'bio_skill_coverage':    bio_skill_coverage(mentor_bio,
-                                         mentee.get('current_skills') or []),
+            'mentee_skill_count':  len(mentee.get('current_skills') or []),
+            'bio_goal_tfidf_sim':  bio_goal_tfidf_sim(mentor_bio, mentee_goals),
+            'bio_goal_sbert_sim':  bio_goal_sbert_sim(pos, mentee_goals),
+            'bio_domain_coverage': bio_domain_coverage(mentor_bio,
+                                       mentee.get('desired_domains') or []),
+            'bio_skill_coverage':  bio_skill_coverage(mentor_bio,
+                                       mentee.get('current_skills') or []),
         }
         features_list.append(features)
 
     return pd.DataFrame(features_list)
-
-
-# Startup: load model (required) + DB data (optional)
 
 
 def load_resources():
@@ -224,27 +212,25 @@ def load_resources():
 
     print("Loading resources...")
 
-    # ---- Model (required) ----
     try:
-        model = joblib.load(MODEL_PATH)
+        model        = joblib.load(MODEL_PATH)
         feature_cols = joblib.load(FEATURE_COLS_PATH)
         print(f"   Model loaded: {type(model).__name__}")
     except FileNotFoundError as e:
         print(f"   Model files not found: {e}")
-        print("    Train your model first, then update MODEL_PATH in .env or the script.")
         return False
         
     try:
         tfidf_vectorizer = joblib.load(TFIDF_PATH)
-        print(f"   TF-IDF vectorizer loaded  (vocab: {len(tfidf_vectorizer.vocabulary_)})")
+        print(f"   TF-IDF vectorizer loaded (vocab: {len(tfidf_vectorizer.vocabulary_)})")
     except FileNotFoundError:
-        print("   tfidf_vectorizerv2.pkl not found — NLP features will be 0")
+        print("   tfidf_vectorizer not found — NLP features will be 0")
 
     try:
         mentor_sbert_vecs = joblib.load(SBERT_VECS_PATH)
-        print(f"   SBERT vectors loaded  shape={mentor_sbert_vecs.shape}")
+        print(f"   SBERT vectors loaded shape={mentor_sbert_vecs.shape}")
     except FileNotFoundError:
-        print("   mentor_sbert_vecs.pkl not found — will fall back to TF-IDF")
+        print("   mentor_sbert_vecs not found — will fall back to TF-IDF")
         
     if mentor_sbert_vecs is not None:
         try:
@@ -253,10 +239,9 @@ def load_resources():
             print("   SBERT model loaded")
         except ImportError:
             print("   sentence-transformers not installed — SBERT disabled")
-    # ---- Database (optional) ----
+
     if not DB_URL:
-        print("    DATABASE_URL not set — DB-dependent endpoints will be unavailable.")
-        print("     /api/recommend with mentee_data will still work.")
+        print("   DATABASE_URL not set — DB endpoints unavailable")
         return True   
 
     try:
@@ -272,11 +257,12 @@ def load_resources():
             pool_recycle=3600
         )
         with engine.connect() as conn:
-            mentors_df  = pd.read_sql_query(text("SELECT * FROM mentors  WHERE active = TRUE"), conn)
-            mentees_df  = pd.read_sql_query(text("SELECT * FROM mentees  WHERE active = TRUE"), conn)
+            mentors_df = pd.read_sql_query(text("SELECT * FROM mentors WHERE active = TRUE"), conn)
+            mentees_df = pd.read_sql_query(text("SELECT * FROM mentees WHERE active = TRUE"), conn)
 
         mentors_df['mentor_id'] = mentors_df['mentor_id'].astype('int32')
         mentees_df['mentee_id'] = mentees_df['mentee_id'].astype('int32')
+
         import json
         def parse_list(val):
             if isinstance(val, list): return val
@@ -290,19 +276,18 @@ def load_resources():
         for col in ['desired_domains', 'current_skills']:
             mentees_df[col] = mentees_df[col].apply(parse_list)
 
-        mentors_df['bio']   = mentors_df['bio'].fillna('').astype(str)
+        mentors_df['bio'] = mentors_df['bio'].fillna('').astype(str)
         if 'goals' in mentees_df.columns:
             mentees_df['goals'] = mentees_df['goals'].fillna('').astype(str)
+
         print(f"   Loaded {len(mentors_df)} mentors, {len(mentees_df)} mentees from DB")
     except Exception as e:
-        print(f"    Database connection failed: {e}")
-        print("     /api/recommend with mentee_data will still work if you pass mentors in the request.")
+        print(f"   Database connection failed: {e}")
 
     return True
 
 
 # Endpoints
-
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -320,12 +305,10 @@ def health_check():
 def get_mentors():
     if mentors_df is None:
         return jsonify({'error': 'Mentor data not loaded (DB unavailable)'}), 503
-
     mentors_list = mentors_df.to_dict('records')
     for m in mentors_list:
         if isinstance(m.get('skills'),  np.ndarray): m['skills']  = m['skills'].tolist()
         if isinstance(m.get('domains'), np.ndarray): m['domains'] = m['domains'].tolist()
-
     return jsonify({'count': len(mentors_list), 'mentors': mentors_list})
 
 
@@ -334,49 +317,19 @@ def get_mentors():
 def get_mentees():
     if mentees_df is None:
         return jsonify({'error': 'Mentee data not loaded (DB unavailable)'}), 503
-
     mentees_list = mentees_df.to_dict('records')
     for m in mentees_list:
         if isinstance(m.get('current_skills'),  np.ndarray): m['current_skills']  = m['current_skills'].tolist()
         if isinstance(m.get('desired_domains'), np.ndarray): m['desired_domains'] = m['desired_domains'].tolist()
-
     return jsonify({'count': len(mentees_list), 'mentees': mentees_list})
 
 
-@app.route('/api/recommend', methods=['POST'])
+@app.route('/api/recommend', methods=['POST', 'OPTIONS'])
 @limiter.limit("10 per minute")
 def recommend_mentors():
-    """
-    Recommend mentors for a mentee.
-
-    Two modes:
-      A) mentee_data  — pass mentee profile directly (no DB needed).
-                        Optionally pass a 'mentors' list to use custom mentors
-                        instead of the DB-loaded ones.
-      B) mentee_id    — look up an existing mentee from the DB.
-
-    Request body examples:
-
-      Mode A (from form / registration):
-        {
-          "mentee_data": {
-            "name": "Amina",
-            "desired_domains": ["AI", "Product Management"],
-            "current_skills": ["Python", "Excel"],
-            "current_level": "intermediate",
-            "industry": "Tech",
-            "preferred_style": "structured",
-            "availability_hours": 8
-          },
-          "top_k": 5
-        }
-
-      Mode B (existing mentee):
-        { "mentee_id": 42, "top_k": 5 }
-    """
-
     if request.method == 'OPTIONS':
         return '', 204
+
     if model is None:
         return jsonify({'error': 'Model not loaded'}), 500
 
@@ -386,48 +339,32 @@ def recommend_mentors():
 
     start_time = time.time()
 
-   
-    # 1. Resolve mentee
-
     if 'mentee_data' in data:
         mentee = data['mentee_data']
         mentee_name = mentee.get('name', 'New User')
-
     elif 'mentee_id' in data:
         if mentees_df is None:
-            return jsonify({'error': 'DB not available; cannot look up mentee_id. Use mentee_data instead.'}), 503
+            return jsonify({'error': 'DB not available; use mentee_data instead.'}), 503
         mentee_row = mentees_df[mentees_df['mentee_id'] == data['mentee_id']]
         if len(mentee_row) == 0:
             return jsonify({'error': f"Mentee {data['mentee_id']} not found"}), 404
         mentee = mentee_row.iloc[0].to_dict()
         mentee_name = mentee.get('name', str(data['mentee_id']))
-
     else:
         return jsonify({'error': 'Provide either "mentee_data" (dict) or "mentee_id" (int)'}), 400
 
-    
-    # 2. Resolve mentor pool
-
     if 'mentors' in data:
-        
         pool = pd.DataFrame(data['mentors'])
     elif mentors_df is not None:
         pool = mentors_df
     else:
-        return jsonify({
-            'error': 'No mentor data available. '
-                     'Either connect the DB, or pass a "mentors" list in the request body.'
-        }), 503
+        return jsonify({'error': 'No mentor data available.'}), 503
 
     if pool.empty:
         return jsonify({'error': 'Mentor pool is empty'}), 400
 
-  
-    # 3. Build features & predict
-    
     features_df = create_features_batch(mentee, pool)
 
-    # Validate feature columns
     missing = [c for c in feature_cols if c not in features_df.columns]
     if missing:
         return jsonify({'error': f'Missing feature columns: {missing}'}), 500
@@ -438,11 +375,9 @@ def recommend_mentors():
     top_k       = int(data.get('top_k', 5))
     top_indices = np.argsort(success_probs)[::-1][:top_k]
 
-    # 4. Build response
-   
     recommendations = []
     for idx in top_indices:
-        mentor = pool.iloc[idx]
+        mentor  = pool.iloc[idx]
         domains = mentor.get('domains') or []
         if isinstance(domains, np.ndarray):
             domains = domains.tolist()
@@ -483,7 +418,6 @@ def recommend_mentors():
 
 @app.route('/api/match-score', methods=['POST'])
 def get_match_score():
-    """Get match score for a specific mentor-mentee pair (both must be in DB)."""
     if model is None or mentors_df is None or mentees_df is None:
         return jsonify({'error': 'Resources not loaded (model or DB unavailable)'}), 503
 
@@ -514,12 +448,16 @@ def get_match_score():
         'mentee_name': str(mentee.get('name', '')),
         'match_score': float(success_prob),
         'match_details': {
-            'domain_overlap':             float(features['domain_overlap']),
-            'skill_overlap':              float(features['skill_overlap']),
-            'style_match':                bool(features['style_match']),
-            'industry_match':             bool(features['industry_match']),
-            'availability_compatibility': float(features['availability_compatibility']),
-            'experience_compatibility':   float(features['experience_compatibility']),
+            'domain_overlap':       float(features['domain_overlap']),
+            'skill_overlap':        float(features['skill_overlap']),
+            'style_match':          bool(features['style_match']),
+            'industry_match':       bool(features['industry_match']),
+            'availability_compat':  float(features['availability_compat']),
+            'experience_gap_score': float(features['experience_gap_score']),
+            'bio_tfidf_sim':        float(features['bio_goal_tfidf_sim']),
+            'bio_sbert_sim':        float(features['bio_goal_sbert_sim']),
+            'bio_domain_coverage':  float(features['bio_domain_coverage']),
+            'bio_skill_coverage':   float(features['bio_skill_coverage']),
         }
     })
 
@@ -529,10 +467,10 @@ def clear_cache():
     cache.clear()
     return jsonify({'message': 'Cache cleared'})
 
+
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return jsonify({'error': 'Too many requests. Please wait a minute and try again.', 'retry_after': '60s'}), 429
-
 
 @app.errorhandler(404)
 def not_found(error):
@@ -542,18 +480,10 @@ def not_found(error):
 def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
+
+# Called by gunicorn at import time — must be outside __main__
 load_resources()
-
+port = int(os.environ.get("PORT", 10000))
 if __name__ == '__main__':
- 
-    print("MENTOR-MENTEE MATCHING API")
-    port = int(os.environ.get("PORT", 10000))
-
-    if not load_resources():
-        print("\n Failed to load model. Exiting.")
-        exit(1)
-
-
-
+    
     app.run(debug=False, host='0.0.0.0', port=5000, threaded=True)
-
