@@ -528,7 +528,7 @@ def not_found(error):
 def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
-
+load_resources()
 
 if __name__ == '__main__':
  
