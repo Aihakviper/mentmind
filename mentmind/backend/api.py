@@ -28,7 +28,7 @@ CORS(app, resources={
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
-}))
+})
 
 cache_config = {
     'CACHE_TYPE': 'SimpleCache',
