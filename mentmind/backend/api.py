@@ -533,7 +533,7 @@ load_resources()
 if __name__ == '__main__':
  
     print("MENTOR-MENTEE MATCHING API")
- 
+    port = int(os.environ.get("PORT", 10000))
 
     if not load_resources():
         print("\n Failed to load model. Exiting.")
