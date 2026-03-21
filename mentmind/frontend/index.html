@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MentMinds - Empowering Young Leaders Through Mentorship</title>
+    <link rel="icon" href="src/images/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="src/images/favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300;400;600;700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         :root {
             --primary: #E67E22;
@@ -232,7 +235,7 @@
         .hero-image {
             width: 100%;
             height: 500px;
-            background: linear-gradient(135deg, #E67E22, #F39C12);
+            background: transparent;
             border-radius: 30px;
             display: flex;
             align-items: center;
@@ -241,6 +244,87 @@
             box-shadow: 0 20px 60px rgba(230, 126, 34, 0.3);
             position: relative;
             overflow: hidden;
+        }
+
+        .slideshow-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: zoomIn 0.9s ease-in-out forwards;
+            border-radius: 30px;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.9);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .slideshow-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: zoomIn 0.7s ease-in-out forwards;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.05);
+            }
         }
 
         .hero-image::before {
@@ -401,6 +485,7 @@
             justify-content: center;
             margin-bottom: 1rem;
             font-size: 1.8rem;
+            color: white;
         }
 
         .milestone h3 {
@@ -466,6 +551,7 @@
             justify-content: center;
             margin: 0 auto 2rem;
             font-size: 2.5rem;
+            color: white;
         }
 
         .feature-card h3 {
@@ -651,7 +737,10 @@
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-container">
-            <a href="#" class="logo" onclick="showPage('home')">Ment<span>Minds</span></a>
+            <a href="#" class="logo" onclick="showPage('home')">
+                <img src="src/images/header-logo.svg" alt="MentMinds" style="width:36px;height:36px;margin-right:0.5rem;vertical-align:middle;">
+                <span style="vertical-align:middle;">Ment<span style="color:var(--secondary)">Minds</span></span>
+            </a>
             <ul class="nav-links">
                 <li><a href="#" onclick="showPage('home')">Home</a></li>
                 <li><a href="#about">About</a></li>
@@ -696,8 +785,22 @@
                     </div>
                 </div>
                 <div class="hero-visual">
-                    <div class="hero-image">
-                        <span class="hero-icon"></span>
+                    <div class="hero-image" id="slideshowContainer">
+                        <div class="slideshow-container" id="slideshowControl">
+                            <div class="slide active"><img src="src/images/1.jpg" alt="MentMinds Moment 1"></div>
+                            <div class="slide"><img src="src/images/2.jpg" alt="MentMinds Moment 2"></div>
+                            <div class="slide"><img src="src/images/3.jpg" alt="MentMinds Moment 3"></div>
+                            <div class="slide"><img src="src/images/4.jpg" alt="MentMinds Moment 4"></div>
+                            <div class="slide"><img src="src/images/5.jpg" alt="MentMinds Moment 5"></div>
+                            <div class="slide"><img src="src/images/6.jpg" alt="MentMinds Moment 6"></div>
+                            <div class="slide"><img src="src/images/7.jpg" alt="MentMinds Moment 7"></div>
+                            <div class="slide"><img src="src/images/8.jpg" alt="MentMinds Moment 8"></div>
+                            <div class="slide"><img src="src/images/9.jpg" alt="MentMinds Moment 9"></div>
+                            <div class="slide"><img src="src/images/10.jpg" alt="MentMinds Moment 10"></div>
+                            <div class="slide"><img src="src/images/11.jpg" alt="MentMinds Moment 11"></div>
+                            <div class="slide"><img src="src/images/12.jpg" alt="MentMinds Moment 12"></div>
+                            <div class="slide"><img src="src/images/13.jpg" alt="MentMinds Moment 13"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -731,22 +834,22 @@
                     
                     <div class="milestone-grid">
                         <div class="milestone">
-                            <div class="milestone-icon"></div>
+                            <div class="milestone-icon"><i class="fa-solid fa-bullseye"></i></div>
                             <h3>Our Mission</h3>
                             <p>Empowering young Nigerians through accessible, quality mentorship and digital coaching.</p>
                         </div>
                         <div class="milestone">
-                            <div class="milestone-icon"></div>
+                            <div class="milestone-icon"><i class="fa-solid fa-users"></i></div>
                             <h3>Our Community</h3>
                             <p>500+ members including poets, advocates, creatives, and changemakers across Nigeria.</p>
                         </div>
                         <div class="milestone">
-                            <div class="milestone-icon"></div>
+                            <div class="milestone-icon"><i class="fa-solid fa-lightbulb"></i></div>
                             <h3>Our Approach</h3>
                             <p>Free mentorship programs designed to help you find your voice and build confidence.</p>
                         </div>
                         <div class="milestone">
-                            <div class="milestone-icon"></div>
+                            <div class="milestone-icon"><i class="fa-solid fa-chart-line"></i></div>
                             <h3>Our Impact</h3>
                             <p>Helping young leaders take meaningful action in their communities since 2022.</p>
                         </div>
@@ -768,17 +871,19 @@
                 
                 <div class="features-grid">
                     <div class="feature-card">
-                        <div class="feature-icon"></div>
+                        <div class="feature-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
                         <h3>Find Your Match</h3>
                         <p>Browse mentors based on your interests, goals, and learning style. Our AI-powered matching helps you find the perfect fit.</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon"></div>
-                        <h3>Chat & Connect</h3>
-                        <p>Connect with your mentor through our secure chat platform. Schedule sessions and track your progress along the way.</p>
+                        <a href="https://chat.whatsapp.com/BA3dG5vkY5ALfTk3Z49Xvg?mode=hqctcla" target="_blank" style="text-decoration: none; color: inherit;">
+                            <div class="feature-icon"><i class="fa-solid fa-comments"></i></div>
+                            <h3>Chat & Connect</h3>
+                            <p>Connect with your mentor through our secure chat platform. Schedule sessions and track your progress along the way.</p>
+                        </a>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon"></div>
+                        <div class="feature-icon"><i class="fa-solid fa-seedling"></i></div>
                         <h3>Grow Together</h3>
                         <p>Set goals, complete challenges, and celebrate milestones. Watch yourself transform with guidance from experienced mentors.</p>
                     </div>
@@ -938,6 +1043,10 @@
                             <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                         </svg>
                     </a>
+                    <a href="https://chat.whatsapp.com/BA3dG5vkY5ALfTk3Z49Xvg?mode=hqctcla" target="_blank" class="social-link" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://www.facebook.com/share/172JaAV9fp/?mibextid=wwXIfr" target="_blank" class="social-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.tiktok.com/@mentminds?_r=1&_t=ZS-948tzJFMU80" target="_blank" class="social-link" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                    <a href="https://www.instagram.com/ment.minds_?igsh=aGZyYWdtb2ticmVj" target="_blank" class="social-link" title="Instagram"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
             
@@ -973,11 +1082,53 @@
         </div>
         
         <div class="footer-bottom">
-            <p>&copy; 2024 MentMinds. All rights reserved. Built with  in Nigeria.</p>
+            <p>&copy; 2026 MentMinds. All rights reserved.</p>
         </div>
     </footer>
 
     <script>
+        // Slideshow functionality
+        let currentSlideIndex = 0;
+        let slideshowInterval = null;
+        const slideShowContainer = document.getElementById('slideshowContainer');
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            
+            // Wrap around
+            if (index >= slides.length) currentSlideIndex = 0;
+            if (index < 0) currentSlideIndex = slides.length - 1;
+            
+            // Update active slide
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlideIndex].classList.add('active');
+        }
+
+        function nextSlide() {
+            currentSlideIndex++;
+            if (currentSlideIndex >= document.querySelectorAll('.slide').length) {
+                currentSlideIndex = 0;
+            }
+            showSlide(currentSlideIndex);
+        }
+
+        function startSlideshow() {
+            slideshowInterval = setInterval(nextSlide, 900);
+        }
+
+        function stopSlideshow() {
+            clearInterval(slideshowInterval);
+        }
+
+        // Pause on hover, resume on mouse leave
+        if (slideShowContainer) {
+            slideShowContainer.addEventListener('mouseenter', stopSlideshow);
+            slideShowContainer.addEventListener('mouseleave', startSlideshow);
+        }
+
+        // Start slideshow on page load
+        startSlideshow();
+
         function showPage(pageName) {
             // Hide all pages
             document.querySelectorAll('.page-content').forEach(page => {
