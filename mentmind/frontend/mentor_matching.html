@@ -566,9 +566,9 @@
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-container">
-            <a href="index.html" class="logo">Ment<span>Minds</span></a>
+            <a href="mentminds_website.html" class="logo">Ment<span>Minds</span></a>
             <div style="display: flex; gap: 1.5rem; align-items: center;">
-                <a href="index.html" style="text-decoration: none; color: var(--text-dark); font-weight: 500;">← Back to Home</a>
+                <a href="mentminds_website.html" style="text-decoration: none; color: var(--text-dark); font-weight: 500;">← Back to Home</a>
             </div>
         </div>
     </nav>
@@ -600,33 +600,60 @@
                 </div>
         <div class="form-group">
     <label>What do you want to learn?</label>
-    <select id="domains" multiple size="6" required>
-        <option value="Advocacy">Advocacy</option>
-        <option value="Governance">Governance</option>
-        <option value="Poetry">Poetry</option>
-        <option value="Sustainability">Sustainability</option>
-        <hr> <option value="Data Science">Data Science</option>
+        <select id="domains" multiple size="10" required>
+        <option value="Artificial Intelligence">Artificial Intelligence</option>
         <option value="Machine Learning">Machine Learning</option>
+        <option value="Data Science">Data Science</option>
         <option value="Software Engineering">Software Engineering</option>
+        <option value="Cybersecurity">Cybersecurity</option>
+        <option value="Cloud Computing">Cloud Computing</option>
+        <option value="Product Management">Product Management</option>
+        <option value="Entrepreneurship">Entrepreneurship</option>
         <option value="Leadership">Leadership</option>
         <option value="Career Development">Career Development</option>
-    </select>
+        <option value="Research">Research</option>
+        <option value="Public Policy">Public Policy</option>
+        <option value="Civic Engagement">Civic Engagement</option>
+        <option value="Governance">Governance</option>
+        <option value="Advocacy">Advocacy</option>
+        <option value="Sustainability">Sustainability</option>
+        <option value="Climate Tech">Climate Tech</option>
+        <option value="Digital Marketing">Digital Marketing</option>
+        <option value="Creative Writing">Creative Writing</option>
+        <option value="Public Speaking">Public Speaking</option>
+
+</select>
     <small style="color: var(--text-gray); font-size: 0.85rem;">Hold Ctrl/Cmd to select multiple</small>
 </div>
         
 <div class="form-group">
     <label>Your Current Skills</label>
-    <select id="skills" multiple size="5">
+    <select id="skills" multiple size="12">
+
         <option value="Python">Python</option>
-        <option value="Data Analysis">Data Analysis</option>
-        <option value="SQL">SQL</option>
-        <option value="Machine Learning">Machine Learning</option>
         <option value="JavaScript">JavaScript</option>
-        <option value="Product Management">Product Management</option>
-        <option value="Public Speaking">Public Speaking</option>
+        <option value="SQL">SQL</option>
+        <option value="Data Analysis">Data Analysis</option>
+        <option value="Machine Learning">Machine Learning</option>
+        <option value="Deep Learning">Deep Learning</option>
+        <option value="Statistics">Statistics</option>
         <option value="Research">Research</option>
         <option value="Writing">Writing</option>
-    </select>
+        <option value="Public Speaking">Public Speaking</option>
+        <option value="Project Management">Project Management</option>
+        <option value="Product Management">Product Management</option>
+        <option value="Leadership">Leadership</option>
+        <option value="Community Organizing">Community Organizing</option>
+        <option value="Policy Analysis">Policy Analysis</option>
+        <option value="Advocacy">Advocacy</option>
+        <option value="Grant Writing">Grant Writing</option>
+        <option value="Entrepreneurship">Entrepreneurship</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Graphic Design">Graphic Design</option>
+        <option value="Video Editing">Video Editing</option>
+        <option value="Content Creation">Content Creation</option>
+
+</select>
     <small style="color: var(--text-gray); font-size: 0.85rem;">Hold Ctrl/Cmd to select multiple</small>
 </div>
 
@@ -641,12 +668,29 @@
     <select id="industry" required>
         <option value="">Select industry</option>
         <option value="Technology">Technology</option>
-        <option value="Creative Arts">Creative Arts</option> <option value="Nonprofit">Nonprofit / Advocacy</option> <option value="Government">Government / Policy</option> <option value="Environmental">Environmental / Sustainability</option> <option value="Education">Education</option>
-        <option value="Media">Media</option>
-    </select>
-</div>
+        <option value="Artificial Intelligence">Artificial Intelligence</option>
+        <option value="Finance">Finance</option>
+        <option value="Fintech">Fintech</option>
+        <option value="Healthcare">Healthcare</option>
+        <option value="Education">Education</option>
+        <option value="Government">Government / Policy</option>
+        <option value="Nonprofit">Nonprofit / Social Impact</option>
+        <option value="Agriculture">Agriculture / Agritech</option>
+        <option value="Energy">Energy</option>
+        <option value="Environmental">Environment / Sustainability</option>
+        <option value="Media">Media / Journalism</option>
+        <option value="Creative">Creative Arts</option>
+        <option value="Marketing">Marketing / Sales</option>
+        <option value="Business">Business / Entrepreneurship</option>
+        <option value="Consulting">Consulting</option>
+        <option value="Law">Law / Legal</option>
+        <option value="Research">Research / Academia</option>
+        <option value="Public Health">Public Health</option>
 
-                <div class="form-group">
+        </select>
+    </div>
+
+                    <div class="form-group">
                     <label>Learning Style</label>
                     <select id="style" required>
                         <option value="">Select style</option>
@@ -707,7 +751,7 @@
 
     <script>
     // API Configuration
-    const API_URL = 'https://mentmind.onrender.com/api';
+    const API_URL = 'http://localhost:5000/api';
     
     let currentMentorId = null;
 

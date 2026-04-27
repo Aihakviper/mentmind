@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join MentMinds - Registration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #0f172a;
+            --bg-light: #1e293b;
+            --bg-card: #334155;
+            --border: #475569;
+            --accent: #8b5cf6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        /* Main Container */
+        .container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .registration-card {
+            background: var(--bg-light);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Steps Indicator */
+        .steps-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .steps-indicator::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 40px;
+            right: 40px;
+            height: 2px;
+            background: var(--border);
+            z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-number {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .step.completed .step-number {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .step.completed .step-number::before {
+            content: '✓';
+        }
+
+        .step-label {
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .step.active .step-label {
+            color: white;
+        }
+
+        /* Form Sections */
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-description {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        /* Role Selection */
+        .role-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .role-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            text-align: center;
+        }
+
+        .role-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .role-card.selected {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .role-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 30px;
+            height: 30px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .role-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+        }
+
+        .role-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .role-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Form Fields */
+        .form-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .form-grid.two-col {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            padding-left: 3rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 2.75rem;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        /* Password Strength Meter */
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .password-strength-bar.weak {
+            width: 33%;
+            background: var(--error);
+        }
+
+        .password-strength-bar.medium {
+            width: 66%;
+            background: var(--warning);
+        }
+
+        .password-strength-bar.strong {
+            width: 100%;
+            background: var(--success);
+        }
+
+        .password-hint {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        /* Password Toggle */
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 2.9rem;
+            cursor: pointer;
+            color: var(--text-light);
+            user-select: none;
+        }
+
+        .password-toggle:hover {
+            color: white;
+        }
+
+        /* Checkbox Groups */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-item {
+            position: relative;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .checkbox-label {
+            padding: 0.625rem 1.25rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + .checkbox-label {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .checkbox-label::before {
+            content: '✓ ';
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + .checkbox-label::before {
+            opacity: 1;
+        }
+
+        /* Select Dropdown */
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%236b7280' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 3rem;
+        }
+
+        select option {
+            background: var(--bg-card);
+            color: white;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 3rem;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-back {
+            background: transparent;
+            color: var(--text-light);
+            border: 2px solid var(--border);
+        }
+
+        .btn-back:hover {
+            border-color: var(--text-light);
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            flex: 1;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .footer a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert.show {
+            display: flex;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-primary.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-primary.loading .btn-text {
+            display: none;
+        }
+
+        /* Security Notice */
+        .security-notice {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-top: 2rem;
+        }
+
+        /* Field Validation */
+        .form-group.error input,
+        .form-group.error textarea,
+        .form-group.error select {
+            border-color: var(--error);
+        }
+
+        .form-group.success input,
+        .form-group.success textarea,
+        .form-group.success select {
+            border-color: var(--success);
+        }
+
+        .field-error {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-group.error .field-error {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .registration-card {
+                padding: 2rem;
+            }
+
+            .form-grid.two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .role-options {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-indicator {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .steps-indicator::before {
+                display: none;
+            }
+
+            .step-label {
+                display: none;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">🎓</div>
+            <span>MentMinds</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="registration-card">
+            <!-- Steps Indicator -->
+            <div class="steps-indicator">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Role Selection</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Profile Details</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Verification</div>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div class="alert alert-error" id="errorAlert">
+                <span></span>
+                <span id="errorMessage"></span>
+            </div>
+
+            <div class="alert alert-success" id="successAlert">
+                <span>✓</span>
+                <span id="successMessage"></span>
+            </div>
+
+            <!-- Step 1: Role Selection -->
+            <div class="form-section active" id="step1">
+                <h2 class="section-title">Choose your path</h2>
+                <p class="section-description">Select how you want to engage with the MentMinds community.</p>
+
+                <div class="role-options">
+                    <div class="role-card" data-role="mentee">
+                        <div class="role-icon">👨‍🎓</div>
+                        <h3 class="role-title">I'm a Mentee</h3>
+                        <p class="role-description">I want to learn, grow my skills, and connect with experienced mentors.</p>
+                    </div>
+
+                    <div class="role-card" data-role="mentor">
+                        <div class="role-icon">👨‍🏫</div>
+                        <h3 class="role-title">I'm a Mentor</h3>
+                        <p class="role-description">I want to share knowledge, guide youth, and give back to the community.</p>
+                    </div>
+
+                    <div class="role-card" data-role="partner">
+                        <div class="role-icon">🤝</div>
+                        <h3 class="role-title">I'm a Partner</h3>
+                        <p class="role-description">Representing an organization looking to collaborate on opportunities.</p>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div></div>
+                    <button class="btn btn-primary" id="continueStep1" disabled>
+                        <span class="btn-text">Continue to Profile Setup</span>
+                        <span class="spinner"></span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Profile Details -->
+            <div class="form-section" id="step2">
+                <h2 class="section-title">Basic Information</h2>
+                <p class="section-description">Tell us about yourself to create your profile.</p>
+
+                <form id="profileForm" novalidate>
+                    <div class="form-grid two-col">
+                        <div class="form-group">
+                            <label for="fullName">Full Name *</label>
+                            <span class="input-icon">👤</span>
+                            <input type="text" id="fullName" placeholder="John Doe" required>
+                            <div class="field-error">Please enter your full name</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <span class="input-icon">📧</span>
+                            <input type="email" id="email" placeholder="john@example.com" required>
+                            <div class="field-error">Please enter a valid email</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid two-col">
+                        <div class="form-group">
+                            <label for="password">Password *</label>
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="password" placeholder="Min. 8 characters" required>
+                            <span class="password-toggle" onclick="togglePassword('password')">👁️</span>
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="passwordStrength"></div>
+                            </div>
+                            <div class="password-hint" id="passwordHint">Use 8+ characters with letters, numbers & symbols</div>
+                            <div class="field-error">Password must be at least 8 characters</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm Password *</label>
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="confirmPassword" placeholder="Re-enter password" required>
+                            <span class="password-toggle" onclick="togglePassword('confirmPassword')">👁️</span>
+                            <div class="field-error">Passwords must match</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid two-col">
+                        <div class="form-group">
+                            <label for="location">Location *</label>
+                            <span class="input-icon">📍</span>
+                            <select id="location" required>
+                                <option value="">Select your city</option>
+                                <option value="Lagos">Lagos</option>
+                                <option value="Abuja">Abuja</option>
+                                <option value="Port Harcourt">Port Harcourt</option>
+                                <option value="Kano">Kano</option>
+                                <option value="Ibadan">Ibadan</option>
+                                <option value="Enugu">Enugu</option>
+                                <option value="Kaduna">Kaduna</option>
+                                <option value="Jos">Jos</option>
+                                <option value="Calabar">Calabar</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="field-error">Please select your location</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number (Optional)</label>
+                            <span class="input-icon">📱</span>
+                            <input type="tel" id="phone" placeholder="+234 xxx xxx xxxx">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="bio">Professional Bio</label>
+                            <span class="input-icon">✍️</span>
+                            <textarea id="bio" placeholder="Tell us a bit about yourself..." style="padding-left: 3rem;"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Areas of Interest * (Select 1-5)</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tech" value="Technology">
+                                    <label for="tech" class="checkbox-label">Technology</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="leadership" value="Leadership">
+                                    <label for="leadership" class="checkbox-label">Leadership</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="design" value="Design">
+                                    <label for="design" class="checkbox-label">Design</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="marketing" value="Marketing">
+                                    <label for="marketing" class="checkbox-label">Marketing</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="entrepreneurship" value="Entrepreneurship">
+                                    <label for="entrepreneurship" class="checkbox-label">Entrepreneurship</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="social" value="Social Impact">
+                                    <label for="social" class="checkbox-label">Social Impact</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="product" value="Product Management">
+                                    <label for="product" class="checkbox-label">Product Management</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="data" value="Data Science">
+                                    <label for="data" class="checkbox-label">Data Science</label>
+                                </div>
+                            </div>
+                            <div class="field-error">Please select 1-5 areas of interest</div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="button-group">
+                    <button class="btn btn-back" id="backToStep1">← Back</button>
+                    <button class="btn btn-primary" id="continueStep2">
+                        <span class="btn-text">Continue to Verification</span>
+                        <span class="spinner"></span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Verification -->
+            <div class="form-section" id="step3">
+                <h2 class="section-title">Check Your Email</h2>
+                <p class="section-description">We've sent a verification link to <strong id="verificationEmail"></strong></p>
+
+                <div style="text-align: center; margin: 3rem 0;">
+                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 1.5rem;">
+                        📧
+                    </div>
+                    <h3 style="margin-bottom: 1rem;">Verification Email Sent!</h3>
+                    <p style="color: var(--text-light); max-width: 500px; margin: 0 auto;">
+                        Click the link in your email to verify your account and start your journey with MentMinds.
+                    </p>
+                </div>
+
+                <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 10px; border-left: 4px solid var(--primary);">
+                    <p style="margin-bottom: 0.5rem;"><strong>Didn't receive the email?</strong></p>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">
+                        Check your spam folder or <a href="#" id="resendLink" style="color: var(--primary);">resend verification email</a>
+                    </p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-back" id="backToStep2">← Back</button>
+                    <button class="btn btn-primary" onclick="window.location.href='login.html'">
+                        <span class="btn-text">Go to Login</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="security-notice">
+                <span>🔒</span>
+                <span>Your data is encrypted and secure</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <a href="#">Terms of Service</a>
+        <span>•</span>
+        <a href="#">Privacy Policy</a>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'http://127.0.0.1:8000/main'; // FastAPI backend
+
+        // State
+        let currentStep = 1;
+        let selectedRole = null;
+        let registrationData = {};
+
+        // Elements
+        const steps = document.querySelectorAll('.step');
+        const sections = document.querySelectorAll('.form-section');
+        const roleCards = document.querySelectorAll('.role-card');
+        const errorAlert = document.getElementById('errorAlert');
+        const successAlert = document.getElementById('successAlert');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const passwordInput = document.getElementById('password');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const passwordHint = document.getElementById('passwordHint');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Role selection
+            roleCards.forEach(card => {
+                card.addEventListener('click', () => selectRole(card));
+            });
+
+            // Navigation buttons
+            document.getElementById('continueStep1').addEventListener('click', () => goToStep(2));
+            document.getElementById('continueStep2').addEventListener('click', handleRegistration);
+            document.getElementById('backToStep1').addEventListener('click', () => goToStep(1));
+            document.getElementById('backToStep2').addEventListener('click', () => goToStep(2));
+            document.getElementById('resendLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                resendVerification();
+            });
+
+            // Password strength
+            passwordInput.addEventListener('input', checkPasswordStrength);
+
+            // Real-time validation
+            document.getElementById('email').addEventListener('blur', validateEmail);
+            document.getElementById('confirmPassword').addEventListener('input', validatePasswordMatch);
+        }
+
+        function selectRole(card) {
+            roleCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedRole = card.dataset.role;
+            document.getElementById('continueStep1').disabled = false;
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+
+            steps.forEach((s, index) => {
+                const stepNum = index + 1;
+                if (stepNum < step) {
+                    s.classList.add('completed');
+                    s.classList.remove('active');
+                } else if (stepNum === step) {
+                    s.classList.add('active');
+                    s.classList.remove('completed');
+                } else {
+                    s.classList.remove('active', 'completed');
+                }
+            });
+
+            sections.forEach((section, index) => {
+                section.classList.toggle('active', index + 1 === step);
+            });
+
+            hideAlerts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function checkPasswordStrength() {
+            const password = passwordInput.value;
+            let strength = 0;
+
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+            passwordStrength.className = 'password-strength-bar';
+            if (strength <= 2) {
+                passwordStrength.classList.add('weak');
+                passwordHint.textContent = 'Weak password - add more characters';
+                passwordHint.style.color = 'var(--error)';
+            } else if (strength <= 4) {
+                passwordStrength.classList.add('medium');
+                passwordHint.textContent = 'Good password - consider adding symbols';
+                passwordHint.style.color = 'var(--warning)';
+            } else {
+                passwordStrength.classList.add('strong');
+                passwordHint.textContent = 'Strong password! ✓';
+                passwordHint.style.color = 'var(--success)';
+            }
+        }
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            field.type = field.type === 'password' ? 'text' : 'password';
+        }
+
+        function validateEmail() {
+            const emailField = document.getElementById('email');
+            const emailGroup = emailField.closest('.form-group');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (emailRegex.test(emailField.value)) {
+                emailGroup.classList.remove('error');
+                emailGroup.classList.add('success');
+                return true;
+            } else {
+                emailGroup.classList.remove('success');
+                emailGroup.classList.add('error');
+                return false;
+            }
+        }
+
+        function validatePasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword');
+            const confirmGroup = confirmPassword.closest('.form-group');
+
+            if (confirmPassword.value && password === confirmPassword.value) {
+                confirmGroup.classList.remove('error');
+                confirmGroup.classList.add('success');
+                return true;
+            } else if (confirmPassword.value) {
+                confirmGroup.classList.remove('success');
+                confirmGroup.classList.add('error');
+                return false;
+            }
+            return true;
+        }
+
+        async function handleRegistration() {
+            // Get form data
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const location = document.getElementById('location').value;
+            const phone = document.getElementById('phone').value.trim();
+            const bio = document.getElementById('bio').value.trim();
+
+            // Get selected interests
+            const interests = [];
+            document.querySelectorAll('.checkbox-item input:checked').forEach(cb => {
+                interests.push(cb.value);
+            });
+
+            // Validation
+            let isValid = true;
+
+            if (!fullName) {
+                showFieldError('fullName', 'Please enter your full name');
+                isValid = false;
+            }
+
+            if (!validateEmail()) {
+                isValid = false;
+            }
+
+            if (password.length < 8) {
+                showFieldError('password', 'Password must be at least 8 characters');
+                isValid = false;
+            }
+
+            if (password !== confirmPassword) {
+                showFieldError('confirmPassword', 'Passwords must match');
+                isValid = false;
+            }
+
+            if (!location) {
+                showFieldError('location', 'Please select your location');
+                isValid = false;
+            }
+
+            if (interests.length === 0 || interests.length > 5) {
+                showError('Please select 1-5 areas of interest');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return;
+            }
+
+            // Prepare registration data
+            registrationData = {
+                email,
+                password,
+                full_name: fullName,
+                role: selectedRole,
+                location,
+                phone,
+                bio,
+                areas_of_interest: interests
+            };
+
+            // Show loading
+            const btn = document.getElementById('continueStep2');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(registrationData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Registration failed');
+                }
+
+                document.getElementById('verificationEmail').textContent = email;
+                goToStep(3);
+                showSuccess('Registration successful! Please check your email.');
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError(error.message);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const group = field.closest('.form-group');
+            group.classList.add('error');
+            group.classList.remove('success');
+        }
+
+        async function resendVerification() {
+            const email = registrationData.email;
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/resend-verification`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('Verification email resent! Please check your inbox.');
+                } else {
+                    throw new Error(data.detail || 'Failed to resend email');
+                }
+            } catch (error) {
+                console.error('Resend error:', error);
+                showError(error.message);
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.classList.add('show');
+            successAlert.classList.remove('show');
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successAlert.classList.add('show');
+            errorAlert.classList.remove('show');
+        }
+
+        function hideAlerts() {
+            errorAlert.classList.remove('show');
+            successAlert.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

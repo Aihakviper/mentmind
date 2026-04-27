@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor Dashboard - MentMinds</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#667eea;--accent:#8b5cf6;--secondary:#764ba2;
+            --success:#10b981;--warning:#f59e0b;--error:#ef4444;
+            --bg:#0f172a;--bg-light:#1e293b;--bg-card:#1e293b;--bg-card2:#243044;
+            --border:#334155;--text:#f1f5f9;--text-muted:#64748b;
+        }
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+             background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+        /* ── Sidebar ── */
+        .sidebar{width:240px;background:var(--bg-light);padding:1.5rem 1rem;
+                 display:flex;flex-direction:column;gap:.5rem;position:fixed;
+                 height:100vh;border-right:1px solid var(--border)}
+        .logo{display:flex;align-items:center;gap:.75rem;font-size:1.2rem;
+              font-weight:700;padding:.5rem 1rem;margin-bottom:1rem}
+        .logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--primary));
+                   border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+        .nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;
+                  border-radius:10px;color:var(--text-muted);text-decoration:none;
+                  cursor:pointer;transition:all .2s;font-size:.95rem}
+        .nav-item:hover{background:var(--bg-card2);color:var(--text)}
+        .nav-item.active{background:linear-gradient(135deg,var(--primary),var(--secondary));
+                         color:#fff;box-shadow:0 4px 12px rgba(102,126,234,.3)}
+        .nav-icon{font-size:1.1rem;width:20px;text-align:center}
+
+        .sidebar-footer{margin-top:auto;padding:1rem;background:var(--bg-card2);
+                        border-radius:12px;display:flex;align-items:center;gap:.75rem}
+        .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));
+                display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0}
+        .footer-info{flex:1;min-width:0}
+        .footer-name{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .footer-id{font-size:.75rem;color:var(--text-muted)}
+        .settings-btn{color:var(--text-muted);cursor:pointer;font-size:1rem}
+
+        /* ── Main ── */
+        .main{margin-left:240px;flex:1;padding:2rem;overflow-y:auto}
+
+        /* ── Page header ── */
+        .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem}
+        .page-header h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem}
+        .page-header p{color:var(--text-muted);font-size:.95rem}
+        .header-actions{display:flex;gap:.75rem}
+        .btn{padding:.65rem 1.25rem;border-radius:10px;border:none;font-weight:600;
+             cursor:pointer;display:flex;align-items:center;gap:.5rem;font-size:.9rem;transition:all .2s}
+        .btn-outline{background:transparent;border:2px solid var(--border);color:var(--text)}
+        .btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+        .btn-primary{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+
+        /* ── Stat cards ── */
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem}
+        .stat-card{background:var(--bg-card);border-radius:14px;padding:1.25rem;position:relative;
+                   border:1px solid var(--border)}
+        .stat-badge{position:absolute;top:1rem;right:1rem;font-size:.8rem;color:var(--success);font-weight:600}
+        .stat-icon-wrap{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;
+                        justify-content:center;font-size:1.25rem;margin-bottom:.75rem}
+        .icon-blue{background:rgba(102,126,234,.15)}
+        .icon-orange{background:rgba(245,158,11,.15)}
+        .icon-yellow{background:rgba(251,191,36,.15)}
+        .icon-green{background:rgba(16,185,129,.15)}
+        .stat-value{font-size:1.75rem;font-weight:700;margin-bottom:.2rem}
+        .stat-label{color:var(--text-muted);font-size:.85rem}
+
+        /* ── Two-column layout ── */
+        .content-grid{display:grid;grid-template-columns:1fr 340px;gap:1.5rem}
+
+        /* ── Cards ── */
+        .card{background:var(--bg-card);border-radius:14px;padding:1.5rem;border:1px solid var(--border)}
+        .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+        .card-title{font-weight:600;font-size:1rem}
+        .view-all{color:var(--primary);font-size:.85rem;cursor:pointer;text-decoration:none}
+
+        /* ── Chart ── */
+        .chart-filters{display:flex;gap:.5rem}
+        .chart-filter{padding:.35rem .75rem;border-radius:8px;border:1px solid var(--border);
+                      background:transparent;color:var(--text-muted);font-size:.8rem;cursor:pointer}
+        .chart-filter.active{background:var(--bg-card2);color:var(--text);border-color:var(--primary)}
+        .chart-wrap{height:200px;display:flex;align-items:flex-end;gap:6px;margin-top:1rem}
+        .chart-line-placeholder{width:100%;height:180px;position:relative;overflow:hidden}
+        .chart-line-placeholder svg{width:100%;height:100%}
+        .chart-labels{display:flex;justify-content:space-between;margin-top:.5rem}
+        .chart-lbl{font-size:.75rem;color:var(--text-muted)}
+
+        /* ── Resources ── */
+        .resource-item{display:flex;align-items:center;gap:1rem;padding:1rem;
+                       background:var(--bg-card2);border-radius:10px;margin-bottom:.75rem}
+        .resource-icon{width:42px;height:42px;border-radius:8px;display:flex;align-items:center;
+                       justify-content:center;font-size:1.25rem;flex-shrink:0}
+        .res-pdf{background:rgba(239,68,68,.15)}
+        .res-video{background:rgba(102,126,234,.15)}
+        .resource-name{font-weight:600;font-size:.9rem;margin-bottom:.2rem}
+        .resource-meta{font-size:.8rem;color:var(--text-muted)}
+
+        /* ── Right column ── */
+        .mentee-item{display:flex;align-items:center;gap:.75rem;padding:1rem;
+                     background:var(--bg-card2);border-radius:10px;margin-bottom:.75rem}
+        .mentee-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));
+                       display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0}
+        .mentee-info{flex:1;min-width:0}
+        .mentee-name{font-weight:600;font-size:.9rem}
+        .mentee-topic{font-size:.8rem;color:var(--text-muted)}
+        .mentee-session{font-size:.8rem;color:var(--text-muted);white-space:nowrap}
+        .msg-btn{width:32px;height:32px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);
+                 display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem}
+
+        /* ── AI Insights ── */
+        .ai-card{background:var(--bg-card2);border-radius:14px;padding:1.25rem;border:1px solid var(--border)}
+        .ai-card-title{font-size:.85rem;font-weight:600;color:var(--accent);margin-bottom:.75rem;
+                       display:flex;align-items:center;gap:.5rem}
+        .ai-text{font-size:.875rem;color:var(--text-muted);line-height:1.6;margin-bottom:1rem}
+        .btn-generate{width:100%;padding:.7rem;background:var(--bg-card);border:1px solid var(--border);
+                      border-radius:8px;color:var(--text);font-size:.875rem;cursor:pointer;
+                      font-weight:500;transition:all .2s}
+        .btn-generate:hover{border-color:var(--primary);color:var(--primary)}
+
+        /* ── Loading ── */
+        .loading{text-align:center;padding:4rem 2rem;color:var(--text-muted)}
+        .spinner{width:44px;height:44px;border:4px solid rgba(102,126,234,.2);
+                 border-top-color:var(--primary);border-radius:50%;
+                 animation:spin .8s linear infinite;margin:0 auto 1rem}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:900px){.content-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<div class="sidebar">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        MentMinds
+    </div>
+    <a class="nav-item active" href="#"><span class="nav-icon">📊</span>Dashboard</a>
+    <a class="nav-item" href="#"><span class="nav-icon">👥</span>My Mentees</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🎓</span>Classrooms</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📁</span>Resources</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📈</span>Engagement</a>
+
+    <div class="sidebar-footer">
+        <div class="avatar" id="sidebarAvatar">JD</div>
+        <div class="footer-info">
+            <div class="footer-name" id="sidebarName">Loading...</div>
+            <div class="footer-id" id="sidebarId">ID: MM-0000</div>
+        </div>
+        <span class="settings-btn" onclick="logout()" title="Logout">🚪</span>
+    </div>
+</div>
+
+<!-- ── Main ── -->
+<div class="main">
+
+    <!-- Loading -->
+    <div id="loadingState" class="loading">
+        <div class="spinner"></div>
+        <p>Loading your dashboard...</p>
+    </div>
+
+    <!-- Dashboard content -->
+    <div id="dashboardContent" style="display:none">
+
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h1 id="pageTitle">Mentor Dashboard</h1>
+                <p id="pageSubtitle">Welcome back. You have 0 sessions today.</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline">➕ Upload Resource</button>
+                <button class="btn btn-primary">▶ Start Session</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-badge" id="menteeBadge">+2</div>
+                <div class="stat-icon-wrap icon-blue">👥</div>
+                <div class="stat-value" id="totalMentees">0</div>
+                <div class="stat-label">Active Mentees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-badge" id="hoursBadge">+12%</div>
+                <div class="stat-icon-wrap icon-orange">⏱️</div>
+                <div class="stat-value" id="totalSessions">0</div>
+                <div class="stat-label">Hours Mentored</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-badge" id="ratingBadge" style="color:var(--warning)">0.2</div>
+                <div class="stat-icon-wrap icon-yellow">⭐</div>
+                <div class="stat-value" id="avgRating">0.0</div>
+                <div class="stat-label">Avg. Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-badge">+4</div>
+                <div class="stat-icon-wrap icon-green">📋</div>
+                <div class="stat-value">24</div>
+                <div class="stat-label">Resources Shared</div>
+            </div>
+        </div>
+
+        <!-- Content grid -->
+        <div class="content-grid">
+
+            <!-- Left column -->
+            <div>
+                <!-- Engagement chart -->
+                <div class="card" style="margin-bottom:1.5rem">
+                    <div class="card-header">
+                        <span class="card-title">Mentee Engagement</span>
+                        <div class="chart-filters">
+                            <button class="chart-filter active">Last 7 Days</button>
+                            <button class="chart-filter">Last Month</button>
+                        </div>
+                    </div>
+                    <!-- Simple SVG line chart -->
+                    <div class="chart-line-placeholder">
+                        <svg viewBox="0 0 700 180" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%"   stop-color="#667eea" stop-opacity=".3"/>
+                                    <stop offset="100%" stop-color="#667eea" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                            <!-- Fill -->
+                            <path id="chartFill" fill="url(#chartGrad)"/>
+                            <!-- Line -->
+                            <path id="chartLine" fill="none" stroke="#667eea" stroke-width="2.5"
+                                  stroke-linecap="round" stroke-linejoin="round"/>
+                            <!-- Dots -->
+                            <g id="chartDots" fill="#667eea"/>
+                        </svg>
+                    </div>
+                    <div class="chart-labels" id="chartLabels"></div>
+                </div>
+
+                <!-- Resources -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recently Uploaded Resources</span>
+                        <a class="view-all" href="#">View All</a>
+                    </div>
+                    <div class="resource-item">
+                        <div class="resource-icon res-pdf">📄</div>
+                        <div>
+                            <div class="resource-name">Case Study Template.pdf</div>
+                            <div class="resource-meta">Shared with 8 mentees</div>
+                        </div>
+                    </div>
+                    <div class="resource-item">
+                        <div class="resource-icon res-video">🎬</div>
+                        <div>
+                            <div class="resource-name">Portfolio Review Session #4</div>
+                            <div class="resource-meta">Recorded 2 days ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column -->
+            <div>
+                <!-- Active mentees -->
+                <div class="card" style="margin-bottom:1.25rem">
+                    <div class="card-header">
+                        <span class="card-title">Active Mentees</span>
+                        <a class="view-all" href="#">View All</a>
+                    </div>
+                    <div id="menteeList">
+                        <div class="mentee-item">
+                            <div class="mentee-avatar">AJ</div>
+                            <div class="mentee-info">
+                                <div class="mentee-name">Alex Johnson</div>
+                                <div class="mentee-topic">UI/UX Design</div>
+                            </div>
+                            <div class="mentee-session">Today, 4:00 PM</div>
+                            <div class="msg-btn">💬</div>
+                        </div>
+                        <div class="mentee-item">
+                            <div class="mentee-avatar">SW</div>
+                            <div class="mentee-info">
+                                <div class="mentee-name">Sarah Williams</div>
+                                <div class="mentee-topic">Product Management</div>
+                            </div>
+                            <div class="mentee-session">Fri, 2:00 PM</div>
+                            <div class="msg-btn">💬</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Insights -->
+                <div class="ai-card">
+                    <div class="ai-card-title">✨ AI Insights</div>
+                    <div class="ai-text" id="aiInsight">
+                        Loading insights for your mentees...
+                    </div>
+                    <button class="btn-generate" onclick="generateMessage()">Generate Message</button>
+                </div>
+            </div>
+
+        </div>
+    </div><!-- /dashboardContent -->
+</div><!-- /main -->
+
+<script>
+    const API_URL = 'http://localhost:8000/api'; // FastAPI backend
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('accessToken');
+        const user  = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!token || !user.id) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/dashboard/mentor`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.status === 401) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (res.status === 403) {
+                // Not a mentor — redirect to mentee dashboard
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            if (!res.ok) throw new Error('Failed to load dashboard');
+
+            const data = await res.json();
+            renderDashboard(data);
+
+        } catch (err) {
+            document.getElementById('loadingState').innerHTML =
+                `<p style="color:var(--error)">⚠️ ${err.message}</p>
+                 <button onclick="location.reload()" style="margin-top:1rem;padding:.5rem 1rem;
+                 background:var(--primary);border:none;border-radius:8px;color:#fff;cursor:pointer">
+                 Retry</button>`;
+        }
+    });
+
+    function renderDashboard(data) {
+        const user   = data.user;
+        const stats  = data.stats;
+        const weekly = data.weekly_engagement;
+
+        // Sidebar
+        const initials = user.full_name.split(' ').map(n => n[0]).join('');
+        document.getElementById('sidebarAvatar').textContent = initials;
+        document.getElementById('sidebarName').textContent   = user.full_name;
+        document.getElementById('sidebarId').textContent     = `ID: MM-${String(user.id).padStart(4,'0')}`;
+
+        // Header
+        const first = user.full_name.split(' ')[0];
+        document.getElementById('pageSubtitle').textContent =
+            `Welcome back, ${first}. You have ${stats.total_sessions || 0} sessions today.`;
+
+        // Stats
+        document.getElementById('totalMentees').textContent  = stats.total_mentees  || 0;
+        document.getElementById('totalSessions').textContent = stats.total_sessions || 0;
+        document.getElementById('avgRating').textContent     = Number(stats.rating || 0).toFixed(1);
+
+        // Chart
+        drawLineChart(weekly.data, weekly.labels);
+
+        // AI insight
+        document.getElementById('aiInsight').textContent =
+            "Your mentees are progressing well. Consider scheduling a group session " +
+            "this week to cover common challenges.";
+
+        // Show content
+        document.getElementById('loadingState').style.display    = 'none';
+        document.getElementById('dashboardContent').style.display = 'block';
+    }
+
+    function drawLineChart(values, labels) {
+        const W = 700, H = 160;
+        const max = Math.max(...values, 1);
+        const step = W / (values.length - 1);
+
+        const pts = values.map((v, i) => ({
+            x: i * step,
+            y: H - (v / max) * H * 0.85
+        }));
+
+        const linePath = pts.map((p, i) =>
+            (i === 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`)
+        ).join(' ');
+
+        const fillPath = linePath +
+            ` L${pts[pts.length-1].x},${H} L0,${H} Z`;
+
+        document.getElementById('chartLine').setAttribute('d', linePath);
+        document.getElementById('chartFill').setAttribute('d', fillPath);
+
+        document.getElementById('chartDots').innerHTML = pts.map(p =>
+            `<circle cx="${p.x}" cy="${p.y}" r="4"/>`
+        ).join('');
+
+        document.getElementById('chartLabels').innerHTML = labels.map(l =>
+            `<span class="chart-lbl">${l}</span>`
+        ).join('');
+    }
+
+    function generateMessage() {
+        const btn = event.target;
+        btn.textContent = '⏳ Generating...';
+        btn.disabled = true;
+        setTimeout(() => {
+            document.getElementById('aiInsight').textContent =
+                "Hi Alex, I noticed your engagement was lower this week. " +
+                "Let's schedule a quick check-in — I've also shared the " +
+                "'Time Management' resource that might help. Keep it up! 💪";
+            btn.textContent = '✅ Message Generated!';
+            setTimeout(() => { btn.textContent = 'Generate Message'; btn.disabled = false; }, 3000);
+        }, 1500);
+    }
+
+    function logout() {
+        if (confirm('Logout?')) { localStorage.clear(); window.location.href = 'login.html'; }
+    }
+</script>
+</body>
+</html>

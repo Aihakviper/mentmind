@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover Mentors - MentMinds</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg: #0f172a;
+            --bg-light: #1e293b;
+            --bg-card: #334155;
+            --sidebar-bg: #1e293b;
+            --border: #475569;
+            --text-light: #6b7280;
+            --accent: #8b5cf6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar - Reuse from dashboard */
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.3s;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-card);
+            color: white;
+        }
+
+        .menu-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .user-profile {
+            margin-top: auto;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .header-title p {
+            color: var(--text-light);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .notification-btn {
+            width: 45px;
+            height: 45px;
+            background: var(--bg-card);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        /* AI Match Banner */
+        .ai-match-banner {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .ai-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .ai-match-content {
+            flex: 1;
+        }
+
+        .ai-match-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-match-description {
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .connect-now-btn {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: var(--accent);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .connect-now-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Main Grid */
+        .discovery-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+        }
+
+        /* Filters Sidebar */
+        .filters-sidebar {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            cursor: pointer;
+        }
+
+        .filter-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .filter-checkbox label {
+            flex: 1;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .filter-dropdown {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .match-score-slider {
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        .reset-filters-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-light);
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s;
+        }
+
+        .reset-filters-btn:hover {
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Mentors List */
+        .mentors-section {
+            min-height: 500px;
+        }
+
+        .mentors-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .showing-count {
+            color: var(--text-light);
+        }
+
+        .sort-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sort-dropdown label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .sort-dropdown select {
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Mentor Cards Grid */
+        .mentors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .mentor-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .mentor-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .mentor-card-header {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .mentor-avatar-large {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .mentor-info {
+            flex: 1;
+        }
+
+        .mentor-name-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .mentor-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .match-badge {
+            background: rgba(102, 126, 234, 0.2);
+            color: var(--primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .mentor-title {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mentor-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .mentor-rating .star {
+            color: #fbbf24;
+        }
+
+        .review-count {
+            color: var(--text-light);
+        }
+
+        .mentor-bio {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .mentor-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .skill-tag {
+            padding: 0.375rem 0.75rem;
+            background: var(--bg-light);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .mentor-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .availability {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .availability.available {
+            color: var(--success);
+        }
+
+        .mentor-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-view {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .btn-view:hover {
+            border-color: var(--primary);
+        }
+
+        .btn-connect {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-connect:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-light);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .discovery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .mentors-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">🎓</div>
+            <span>MentMinds</span>
+        </div>
+
+        <a href="dashboard.html" class="menu-item">
+            <span>📊</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="discovery.html" class="menu-item active">
+            <span>🔍</span>
+            <span>Find Mentors</span>
+        </a>
+        <a href="#" class="menu-item">
+            <span>🎓</span>
+            <span>Classrooms</span>
+        </a>
+        <a href="#" class="menu-item">
+            <span>🤖</span>
+            <span>AI Assistant</span>
+        </a>
+        <a href="#" class="menu-item">
+            <span>💬</span>
+            <span>Community</span>
+        </a>
+
+        <div class="user-profile">
+            <div class="user-avatar" id="userAvatar">JD</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; font-size: 0.9rem;" id="userName">Loading...</div>
+                <div style="font-size: 0.75rem; color: var(--text-light);">Mentee</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-title">
+                <h1>Discover Mentors</h1>
+                <p>AI-powered recommendations based on your learning goals.</p>
+            </div>
+
+            <div class="header-actions">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search by name, skill, or industry...">
+                </div>
+                <button class="notification-btn">🔔</button>
+            </div>
+        </div>
+
+        <!-- AI Match Banner -->
+        <div class="ai-match-banner" id="aiBanner" style="display: none;">
+            <div class="ai-icon">✨</div>
+            <div class="ai-match-content">
+                <div class="ai-match-title" id="aiMatchName">AI Match: Sarah Jenkins</div>
+                <div class="ai-match-description" id="aiMatchDescription">
+                    Based on your interest in 'Product Design' and 'Career Growth', Sarah is a 98% match for your current path.
+                </div>
+            </div>
+            <button class="connect-now-btn" onclick="connectToTopMatch()">Connect Now</button>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="discovery-grid">
+            <!-- Filters Sidebar -->
+            <div class="filters-sidebar">
+                <div class="filter-section">
+                    <div class="filter-title">Category</div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filter-design" value="Design" onchange="applyFilters()">
+                        <label for="filter-design">Design</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filter-engineering" value="Engineering" onchange="applyFilters()">
+                        <label for="filter-engineering">Engineering</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filter-marketing" value="Marketing" onchange="applyFilters()">
+                        <label for="filter-marketing">Marketing</label>
+                    </div>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="filter-leadership" value="Leadership" onchange="applyFilters()">
+                        <label for="filter-leadership">Leadership</label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-title">Experience Level</div>
+                    <select class="filter-dropdown" id="experienceFilter" onchange="applyFilters()">
+                        <option value="">All Levels</option>
+                        <option value="junior">Junior (1-3 years)</option>
+                        <option value="mid">Mid (4-7 years)</option>
+                        <option value="senior">Senior (8+ years)</option>
+                    </select>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-title">Match Score</div>
+                    <input type="range" class="match-score-slider" id="matchScoreSlider" min="0" max="100" value="80" oninput="updateMatchScore()">
+                    <div class="slider-labels">
+                        <span>Min <span id="minMatchScore">80</span>%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+
+                <button class="reset-filters-btn" onclick="resetFilters()">Reset Filters</button>
+            </div>
+
+            <!-- Mentors List -->
+            <div class="mentors-section">
+                <div class="mentors-header">
+                    <div class="showing-count" id="showingCount">Showing 24 Mentors</div>
+                    <div class="sort-dropdown">
+                        <label>Sort by:</label>
+                        <select id="sortBy" onchange="sortMentors()">
+                            <option value="match">Best Match</option>
+                            <option value="rating">Highest Rating</option>
+                            <option value="experience">Most Experience</option>
+                            <option value="alphabetical">A-Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="loading">
+                    <div class="spinner"></div>
+                    <p>Finding the best mentors for you...</p>
+                </div>
+
+                <!-- Mentors Grid -->
+                <div id="mentorsGrid" class="mentors-grid" style="display: none;"></div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-icon">🔍</div>
+                    <h3>No mentors found</h3>
+                    <p>Try adjusting your filters or search criteria</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api'; // FastAPI backend
+        let allMentors = [];
+        let filteredMentors = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check auth
+            const token = localStorage.getItem('accessToken');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+            if (!token || !user.id) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Update user info
+            const firstName = user.full_name?.split(' ')[0] || 'User';
+            const initials = user.full_name?.split(' ').map(n => n[0]).join('') || 'U';
+            document.getElementById('userName').textContent = firstName;
+            document.getElementById('userAvatar').textContent = initials;
+
+            // Load mentors
+            await loadMentors();
+
+            // Setup search
+            document.getElementById('searchInput').addEventListener('input', searchMentors);
+        });
+
+        async function loadMentors() {
+            try {
+                const token = localStorage.getItem('accessToken');
+
+                // Call mentor list API with filters
+                const params = new URLSearchParams({
+                    sort_by: 'match',
+                    min_match: '80'
+                });
+
+                const response = await fetch(`${API_URL}/mentors?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    // Fallback to dashboard endpoint if mentor endpoint not available
+                    return await loadMentorsFromDashboard();
+                }
+
+                const data = await response.json();
+                allMentors = data.mentors || [];
+                filteredMentors = [...allMentors];
+
+                // Show top match banner
+                if (allMentors.length > 0) {
+                    showAIBanner(allMentors[0]);
+                }
+
+                renderMentors();
+                
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('mentorsGrid').style.display = 'grid';
+
+            } catch (error) {
+                console.error('Error loading mentors:', error);
+                // Try fallback
+                await loadMentorsFromDashboard();
+            }
+        }
+
+        async function loadMentorsFromDashboard() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                
+                const response = await fetch(`${API_URL}/dashboard/mentee`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load mentors');
+                }
+
+                const data = await response.json();
+                
+                // Use mentor matches from dashboard, expand with mock data
+                allMentors = expandMentorData(data.mentor_matches || []);
+                filteredMentors = [...allMentors];
+
+                // Show top match banner
+                if (allMentors.length > 0) {
+                    showAIBanner(allMentors[0]);
+                }
+
+                renderMentors();
+                
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('mentorsGrid').style.display = 'grid';
+
+            } catch (error) {
+                console.error('Error loading mentors:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div style="color: var(--error);">
+                        <p>⚠️ Failed to load mentors</p>
+                        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--primary); border: none; border-radius: 8px; color: white; cursor: pointer;">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function expandMentorData(mentors) {
+            // Expand with more mock mentors for demonstration
+            const mockMentors = [
+                {
+                    id: 100,
+                    name: 'Elena Rodriguez',
+                    position: 'Head of Marketing',
+                    company: 'Notion',
+                    expertise_areas: ['Marketing', 'Growth', 'Branding'],
+                    rating: 4.8,
+                    match_score: 87,
+                    reviews: 56,
+                    bio: 'Passionate about brand storytelling and growth loops. Mentor for women in tech.',
+                    skills: ['Growth', 'Branding', 'SaaS'],
+                    available: 'Friday, 2:00 PM',
+                    years_experience: 10
+                },
+                {
+                    id: 101,
+                    name: 'David Park',
+                    position: 'Founder',
+                    company: 'Stealth Startup',
+                    expertise_areas: ['Entrepreneurship', 'Product'],
+                    rating: 4.9,
+                    match_score: 84,
+                    reviews: 210,
+                    bio: 'Serial entrepreneur. I can help with fundraising, MVP development, and building teams.',
+                    skills: ['Startup', 'Venture Capital', 'Product'],
+                    available: 'Available Now',
+                    years_experience: 15
+                }
+            ];
+
+            return [...mentors.map(m => ({
+                ...m,
+                reviews: Math.floor(Math.random() * 200) + 50,
+                bio: 'Experienced mentor helping professionals grow their careers.',
+                skills: m.expertise_areas?.slice(0, 3) || [],
+                available: Math.random() > 0.5 ? 'Available Now' : 'Next Available Friday',
+                years_experience: Math.floor(Math.random() * 15) + 5
+            })), ...mockMentors];
+        }
+
+        function showAIBanner(mentor) {
+            document.getElementById('aiBanner').style.display = 'flex';
+            document.getElementById('aiMatchName').textContent = `AI Match: ${mentor.name}`;
+            document.getElementById('aiMatchDescription').textContent = 
+                `Based on your interests, ${mentor.name} is a ${mentor.match_score}% match for your current path.`;
+        }
+
+        function renderMentors() {
+            const grid = document.getElementById('mentorsGrid');
+            
+            if (filteredMentors.length === 0) {
+                grid.style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+            grid.style.display = 'grid';
+            
+            document.getElementById('showingCount').textContent = `Showing ${filteredMentors.length} Mentors`;
+
+            grid.innerHTML = filteredMentors.map(mentor => `
+                <div class="mentor-card">
+                    <div class="mentor-card-header">
+                        <div class="mentor-avatar-large">${getInitials(mentor.name)}</div>
+                        <div class="mentor-info">
+                            <div class="mentor-name-row">
+                                <span class="mentor-name">${mentor.name}</span>
+                                <span class="match-badge">${mentor.match_score}% Match</span>
+                            </div>
+                            <div class="mentor-title">${mentor.position || 'Mentor'}${mentor.company ? ' at ' + mentor.company : ''}</div>
+                            <div class="mentor-rating">
+                                <span class="star">⭐</span>
+                                <span>${mentor.rating || 4.5}</span>
+                                <span class="review-count">(${mentor.reviews || 0} reviews)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mentor-bio">${mentor.bio || 'Experienced mentor helping professionals achieve their goals.'}</div>
+                    <div class="mentor-skills">
+                        ${(mentor.skills || mentor.expertise_areas || []).slice(0, 3).map(skill => 
+                            `<span class="skill-tag">${skill}</span>`
+                        ).join('')}
+                    </div>
+                    <div class="mentor-card-footer">
+                        <div class="availability ${mentor.available?.toLowerCase().includes('now') ? 'available' : ''}">
+                            ${mentor.available || 'Next Available Soon'}
+                        </div>
+                        <div class="mentor-actions">
+                            <button class="btn-view" onclick="viewProfile(${mentor.id})">View Profile</button>
+                            <button class="btn-connect" onclick="connectMentor(${mentor.id})">Connect</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase();
+        }
+
+        function searchMentors() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!query) {
+                filteredMentors = [...allMentors];
+            } else {
+                filteredMentors = allMentors.filter(mentor => 
+                    mentor.name.toLowerCase().includes(query) ||
+                    mentor.position?.toLowerCase().includes(query) ||
+                    mentor.company?.toLowerCase().includes(query) ||
+                    mentor.expertise_areas?.some(e => e.toLowerCase().includes(query))
+                );
+            }
+            
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let results = [...allMentors];
+            
+            // Search filter
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            if (query) {
+                results = results.filter(mentor => 
+                    mentor.name.toLowerCase().includes(query) ||
+                    mentor.position?.toLowerCase().includes(query) ||
+                    mentor.company?.toLowerCase().includes(query) ||
+                    mentor.expertise_areas?.some(e => e.toLowerCase().includes(query))
+                );
+            }
+            
+            // Category filters
+            const categories = [];
+            ['design', 'engineering', 'marketing', 'leadership'].forEach(cat => {
+                if (document.getElementById(`filter-${cat}`)?.checked) {
+                    categories.push(cat);
+                }
+            });
+            
+            if (categories.length > 0) {
+                results = results.filter(mentor => 
+                    mentor.expertise_areas?.some(e => 
+                        categories.some(cat => e.toLowerCase().includes(cat))
+                    )
+                );
+            }
+            
+            // Match score filter
+            const minMatch = parseInt(document.getElementById('matchScoreSlider').value);
+            results = results.filter(mentor => mentor.match_score >= minMatch);
+            
+            filteredMentors = results;
+            sortMentors();
+        }
+
+        function updateMatchScore() {
+            const value = document.getElementById('matchScoreSlider').value;
+            document.getElementById('minMatchScore').textContent = value;
+            applyFilters();
+        }
+
+        function sortMentors() {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            filteredMentors.sort((a, b) => {
+                switch(sortBy) {
+                    case 'match':
+                        return b.match_score - a.match_score;
+                    case 'rating':
+                        return (b.rating || 0) - (a.rating || 0);
+                    case 'experience':
+                        return (b.years_experience || 0) - (a.years_experience || 0);
+                    case 'alphabetical':
+                        return a.name.localeCompare(b.name);
+                    default:
+                        return 0;
+                }
+            });
+            
+            renderMentors();
+        }
+
+        function resetFilters() {
+            document.querySelectorAll('.filter-checkbox input').forEach(cb => cb.checked = false);
+            document.getElementById('experienceFilter').value = '';
+            document.getElementById('matchScoreSlider').value = 80;
+            document.getElementById('minMatchScore').textContent = '80';
+            document.getElementById('searchInput').value = '';
+            
+            filteredMentors = [...allMentors];
+            renderMentors();
+        }
+
+        function viewProfile(mentorId) {
+            alert(`Viewing profile for mentor ID: ${mentorId}. Profile page coming soon!`);
+        }
+
+        function connectMentor(mentorId) {
+            alert(`Sending connection request to mentor ID: ${mentorId}. This feature will be implemented next!`);
+        }
+
+        function connectToTopMatch() {
+            if (allMentors.length > 0) {
+                connectMentor(allMentors[0].id);
+            }
+        }
+    </script>
+</body>
+</html>
