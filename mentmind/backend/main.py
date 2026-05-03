@@ -169,8 +169,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins     = ["https://mentmind.vercel.app",
-                         "https://mentmind-44lv33f21-aihakvipers-projects.vercel.app/" ],
+    allow_origins     = [
+                         "https://mentmind-44lv33f21-aihakvipers-projects.vercel.app" ],
     allow_credentials = True,
     allow_methods     = ["*"],
     allow_headers     = ["*"],
