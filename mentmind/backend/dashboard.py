@@ -15,6 +15,8 @@ from database import get_db
 from models import User, MenteeProfile, MentorProfile
 from schemas import UserResponse
 from dependencies import get_current_user
+from ai_matching import get_match_score, recommend_for_mentee
+
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -50,7 +52,7 @@ class MentorMatch(BaseModel):
     name: str
     position: Optional[str]
     company: Optional[str]
-    match_score: int
+    match_score: float
     rating: float
     expertise_areas: list[str]
     avatar_url: Optional[str]
@@ -112,21 +114,58 @@ def calculate_match_score(mentee: MenteeProfile, mentor: MentorProfile) -> int:
 
     return min(score, 98)
 
+def get_top_matches(db, mentee_profile, top_k=3):
+    mentors = db.query(MentorProfile).filter(
+        MentorProfile.verification_status == "verified"
+    ).all()
 
-def get_weekly_engagement_data() -> WeeklyEngagement:
+    results = []
+
+    for m in mentors:
+        results.append(MentorMatch(
+            id=m.id,
+            name=m.user.full_name,
+            position=m.current_position,
+            company=m.company,
+            match_score=get_match_score(m, mentee_profile),
+            rating=float(m.rating or 0),
+            expertise_areas=m.expertise_areas or [],
+            avatar_url=m.user.profile_image,
+        ))
+
+    results.sort(key=lambda x: x.match_score, reverse=True)
+    return results[:top_k]
+
+
+
+def get_weekly_engagement_data(db: Session, user_id: int) -> WeeklyEngagement:
     """
-    Returns last 7 days labels + placeholder engagement data.
-    Replace with real activity tracking when you add an ActivityLog table.
+    Returns last 7 days labels + engagement data based on recent activities.
+    Engagement = number of lesson progress updates in the last 7 days.
     """
     from datetime import timedelta
-    today = datetime.now(timezone.utc)
+    from sqlalchemy import func
+    from classrooms import LessonProgress  # import here to avoid circular
+
+    today = datetime.now(timezone.utc).date()
     labels = []
+    data = []
+
     for i in range(6, -1, -1):
         day = today - timedelta(days=i)
-        labels.append(day.strftime("%a"))   # Mon, Tue …
+        labels.append(day.strftime("%a"))
 
-    # Placeholder data — swap with real DB query later
-    data = [30, 45, 60, 50, 80, 40, 55]
+        # Count progress updates on this day
+        start_of_day = datetime.combine(day, datetime.min.time(), tzinfo=timezone.utc)
+        end_of_day = start_of_day + timedelta(days=1)
+
+        count = db.query(func.count(LessonProgress.id)).filter(
+            LessonProgress.user_id == user_id,
+            LessonProgress.updated_at >= start_of_day,
+            LessonProgress.updated_at < end_of_day
+        ).scalar()
+
+        data.append(int(count))
 
     return WeeklyEngagement(labels=labels, data=data)
 
@@ -202,29 +241,30 @@ def mentee_dashboard(
         points_change   = "+240",
     )
 
-    # ── AI Mentor matches ────────────────────────────────────────────────────
-    mentors = db.query(MentorProfile).filter(
-        MentorProfile.verification_status == "verified"
-    ).all()
+    # # ── AI Mentor matches ────────────────────────────────────────────────────
+    # mentors = db.query(MentorProfile).filter(
+    #     MentorProfile.verification_status == "verified"
+    # ).all()
 
-    scored = sorted(
-        [
-            MentorMatch(
-                id              = m.id,
-                name            = m.user.full_name,
-                position        = m.current_position,
-                company         = m.company,
-                match_score     = calculate_match_score(profile, m),
-                rating          = float(m.rating or 0),
-                expertise_areas = m.expertise_areas or [],
-                avatar_url      = m.user.profile_image,
-            )
-            for m in mentors
-        ],
-        key=lambda x: x.match_score,
-        reverse=True,
-    )
-    top_matches = scored[:3]
+    # scored = sorted(
+    #     [
+    #         MentorMatch(
+    #             id              = m.id,
+    #             name            = m.user.full_name,
+    #             position        = m.current_position,
+    #             company         = m.company,
+    #             match_score     = get_match_score(m, profile),
+    #             rating          = float(m.rating or 0),
+    #             expertise_areas = m.expertise_areas or [],
+    #             avatar_url      = m.user.profile_image,
+    #         )
+    #         for m in mentors
+    #     ],
+    #     key=lambda x: x.match_score,
+    #     reverse=True,
+    # )
+    # top_matches = scored[:3]
+    top_matches = get_top_matches(db, profile)
 
     # ── Build first name for welcome ─────────────────────────────────────────
     first_name = current_user.full_name.split()[0]
@@ -233,7 +273,7 @@ def mentee_dashboard(
         user               = UserResponse.model_validate(current_user),
         stats              = stats,
         learning_progress  = get_default_progress(),
-        weekly_engagement  = get_weekly_engagement_data(),
+        weekly_engagement  = get_weekly_engagement_data(db, current_user.id),
         mentor_matches     = top_matches,
         badges             = get_default_badges(),
         welcome_message    = f"Welcome back, {first_name}! 👋",
@@ -280,7 +320,7 @@ def mentor_dashboard(
     return MentorDashboardResponse(
         user              = UserResponse.model_validate(current_user),
         stats             = stats,
-        weekly_engagement = get_weekly_engagement_data(),
+        weekly_engagement = get_weekly_engagement_data(db, current_user.id),
         welcome_message   = f"Welcome back, {first_name}! 👋",
     )
 
