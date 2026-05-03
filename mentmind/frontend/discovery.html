@@ -617,17 +617,30 @@
             <span>🔍</span>
             <span>Find Mentors</span>
         </a>
-        <a href="#" class="menu-item">
+        <a href="classrooms.html" class="menu-item">
             <span>🎓</span>
             <span>Classrooms</span>
         </a>
-        <a href="#" class="menu-item">
+        <a href="ai_mentor.html" class="menu-item">
             <span>🤖</span>
             <span>AI Assistant</span>
         </a>
-        <a href="#" class="menu-item">
+        <a href="forum.html" class="menu-item">
             <span>💬</span>
             <span>Community</span>
+        </a>
+
+        <a href="resources.html" class="menu-item">
+            <span>📁</span>
+            <span>Resources</span>
+        </a>
+        <a href="opportunities.html" class="menu-item">
+            <span>🌟</span>
+            <span>Opportunities</span>
+        </a>
+        <a href="#" class="menu-item" onclick="logout()">
+            <span>🚪</span>
+            <span>Logout</span>
         </a>
 
         <div class="user-profile">
@@ -761,6 +774,13 @@
 
             if (!token || !user.id) {
                 window.location.href = 'login.html';
+                return;
+            }
+
+            const isMentorNav = ['mentor', 'admin'].includes((user.role || '').toLowerCase()) ||
+                localStorage.getItem('activeDashboard') === 'mentor';
+            if (isMentorNav) {
+                window.location.href = 'mentor_dashboard.html';
                 return;
             }
 
@@ -1069,6 +1089,11 @@
             if (allMentors.length > 0) {
                 connectMentor(allMentors[0].id);
             }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
         }
     </script>
 </body>

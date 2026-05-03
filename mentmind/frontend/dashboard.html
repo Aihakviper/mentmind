@@ -556,6 +556,11 @@
                 align-items: flex-start;
                 gap: 1rem;
             }
+            .header {
+        flex-direction: row; /* Keep logo and login button side-by-side */
+        justify-content: space-between;
+        padding: 1rem;
+    }
         }
 
         /* Loading State */
@@ -590,19 +595,25 @@
 
         <div class="menu-section">
             <div class="menu-label">MENU</div>
-            <a href="#" class="menu-item active">
+            <a href="dashboard.html" class="menu-item active">
                 <span class="menu-item-icon">📊</span>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="menu-item">
+            <a href="classrooms.html" class="menu-item">
                 <span class="menu-item-icon">🎓</span>
                 <span>Classrooms</span>
             </a>
-            <a href="#" class="menu-item">
+            <a href="resources.html" class="menu-item">
+                <span class="menu-item-icon">📁</span>
+                <span>Resources</span>
+            </a>
+            <a href="discovery.html" class="menu-item">
                 <span class="menu-item-icon">🔍</span>
                 <span>Discovery</span>
             </a>
-            <a href="#" class="menu-item">
+            <a class="menu-item" href="opportunities.html">
+                <span class="nav-icon">🌟</span>Opportunities</a>
+            <a href="forum.html" class="menu-item">
                 <span class="menu-item-icon">💬</span>
                 <span>Messages</span>
             </a>
@@ -618,6 +629,11 @@
                 <span class="menu-item-icon">⚙️</span>
                 <span>Settings</span>
             </a>
+             <a href="#" class="menu-item" onclick="logout()">
+                <span class="menu-item-icon">   </span>
+                <span>logout</span>
+            </a>
+
         </div>
 
         <div class="user-profile">
@@ -640,17 +656,23 @@
 
         <!-- Dashboard Content -->
         <div id="dashboardContent" style="display: none;">
+            <!-- Mobile Header -->
+            <div class="mobile-header">
+                <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+                <div class="mobile-logo">MentMinds</div>
+            </div>
+
             <!-- Header -->
             <div class="dashboard-header">
                 <div class="welcome-section">
-                    <h1 id="welcomeMessage">Welcome back, Jane! 👋</h1>
+                    <h1 id="welcomeMessage">Welcome back, Jane! </h1>
                     <p id="progressMessage">You're 80% through your 'UI Design Fundamentals' track.</p>
                 </div>
 
                 <div class="header-actions">
                     <button class="notification-btn">🔔</button>
                     <button class="ai-mentor-btn">
-                        <span>✨</span>
+                        <span></span>
                         <span>Ask AI Mentor</span>
                     </button>
                 </div>
@@ -659,21 +681,21 @@
             <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon">🕐</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-value" id="learningHours">0h</div>
                     <div class="stat-label">Learning Hours</div>
                     <div class="stat-change" id="hoursChange">+12%</div>
                 </div>
 
                 <div class="stat-card">
-                    <div class="stat-icon">✅</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-value" id="completedTasks">0</div>
                     <div class="stat-label">Completed Tasks</div>
                     <div class="stat-change" id="tasksChange">+5</div>
                 </div>
 
                 <div class="stat-card">
-                    <div class="stat-icon">⭐</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-value" id="pointsEarned">0</div>
                     <div class="stat-label">Points Earned</div>
                     <div class="stat-change" id="pointsChange">+240</div>
@@ -724,7 +746,7 @@
                     <!-- AI Mentor Matches -->
                     <div class="section-card" style="margin-bottom: 1.5rem;">
                         <div class="section-header">
-                            <h2 class="section-title">✨ AI Mentor Matches</h2>
+                            <h2 class="section-title"> AI Mentor Matches</h2>
                             <a href="#" class="view-link">View All Recommendations</a>
                         </div>
 
@@ -775,6 +797,7 @@
                 window.location.href = 'login.html';
                 return;
             }
+            localStorage.setItem('activeDashboard', 'mentee');
 
             // Load dashboard data
             await loadDashboard();
@@ -831,6 +854,32 @@
                 `;
             }
         }
+
+        async function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        const token = localStorage.getItem('accessToken');
+        
+        try {
+            // 1. Tell the backend we are logging out
+            await fetch(`${API_URL}/logout`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (err) {
+            console.error("Backend logout failed, clearing local session anyway...", err);
+        } finally {
+            // 2. Always clear local data and redirect
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('activeDashboard');
+            window.location.href = 'login.html';
+        }
+    }
+}
 
         function updateUserInfo(user) {
             const firstName = user.full_name.split(' ')[0];

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classrooms - MentMinds</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#667eea;--accent:#8b5cf6;--secondary:#764ba2;
+            --success:#10b981;--warning:#f59e0b;
+            --bg:#0f172a;--bg-light:#1e293b;--bg-card:#243044;
+            --border:#334155;--text:#f1f5f9;--muted:#64748b;
+        }
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+             background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+        /* ── Sidebar ── */
+        .sidebar{width:240px;background:var(--bg-light);padding:1.5rem 1rem;
+                 display:flex;flex-direction:column;gap:.35rem;
+                 position:fixed;height:100vh;border-right:1px solid var(--border);z-index:10}
+        .logo{display:flex;align-items:center;gap:.75rem;font-size:1.15rem;font-weight:700;
+              padding:.5rem 1rem;margin-bottom:1.25rem}
+        .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--primary));
+                   border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+        .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:10px;
+                  color:var(--muted);text-decoration:none;transition:all .2s;font-size:.9rem;cursor:pointer}
+        .nav-item:hover{background:var(--bg-card);color:var(--text)}
+        .nav-item.active{background:linear-gradient(135deg,var(--primary),var(--secondary));
+                         color:#fff;box-shadow:0 4px 12px rgba(102,126,234,.3)}
+        .nav-icon{width:18px;text-align:center;font-size:1rem}
+        .sidebar-footer{margin-top:auto;padding:.875rem;background:var(--bg-card);
+                        border-radius:12px;display:flex;align-items:center;gap:.75rem}
+        .s-avatar{width:36px;height:36px;border-radius:50%;
+                  background:linear-gradient(135deg,var(--primary),var(--secondary));
+                  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .s-name{font-weight:600;font-size:.85rem}
+        .s-id{font-size:.72rem;color:var(--muted)}
+
+        /* ── Main ── */
+        .main{margin-left:240px;flex:1;padding:2rem;max-width:1200px}
+
+        /* ── Header ── */
+        .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+        .page-header h1{font-size:1.75rem;font-weight:700}
+        .page-header p{color:var(--muted);font-size:.9rem;margin-top:.25rem}
+        .search-bar{position:relative;width:320px}
+        .search-bar input{width:100%;padding:.7rem 1rem .7rem 2.75rem;
+                          background:var(--bg-card);border:1px solid var(--border);
+                          border-radius:10px;color:var(--text);font-size:.9rem}
+        .search-bar input:focus{outline:none;border-color:var(--primary)}
+        .search-bar span{position:absolute;left:.875rem;top:50%;transform:translateY(-50%);
+                         color:var(--muted);font-size:.9rem}
+
+        /* ── Filters ── */
+        .filters{display:flex;gap:.625rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
+        .filter-btn{padding:.45rem .875rem;border-radius:20px;border:1px solid var(--border);
+                    background:transparent;color:var(--muted);font-size:.85rem;cursor:pointer;transition:all .2s}
+        .filter-btn:hover{border-color:var(--primary);color:var(--text)}
+        .filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+        .filter-sep{color:var(--border);margin:0 .25rem}
+        select.level-filter{padding:.45rem .875rem;border-radius:20px;border:1px solid var(--border);
+                            background:var(--bg-card);color:var(--muted);font-size:.85rem;cursor:pointer}
+
+        /* ── Section ── */
+        .section-title{font-size:1rem;font-weight:600;margin-bottom:1rem;color:var(--muted);
+                       text-transform:uppercase;letter-spacing:.05em;font-size:.8rem}
+
+        /* ── Course grid ── */
+        .courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.25rem;margin-bottom:2.5rem}
+
+        .course-card{background:var(--bg-light);border-radius:14px;overflow:hidden;
+                     border:1px solid var(--border);cursor:pointer;transition:all .25s}
+        .course-card:hover{transform:translateY(-4px);border-color:var(--primary);
+                           box-shadow:0 8px 24px rgba(102,126,234,.2)}
+        .course-thumb{height:160px;background:linear-gradient(135deg,#1e3a5f,#2d4a7a);
+                      display:flex;align-items:center;justify-content:center;
+                      font-size:3rem;position:relative}
+        .course-thumb img{width:100%;height:100%;object-fit:cover}
+        .course-badge{position:absolute;top:.75rem;right:.75rem;padding:.25rem .6rem;
+                      border-radius:6px;font-size:.75rem;font-weight:600}
+        .badge-beginner{background:rgba(16,185,129,.2);color:var(--success)}
+        .badge-intermediate{background:rgba(245,158,11,.2);color:var(--warning)}
+        .badge-advanced{background:rgba(239,68,68,.2);color:#ef4444}
+        .enrolled-badge{position:absolute;top:.75rem;left:.75rem;padding:.25rem .6rem;
+                        border-radius:6px;font-size:.75rem;font-weight:600;
+                        background:rgba(102,126,234,.3);color:var(--primary)}
+
+        .course-body{padding:1.125rem}
+        .course-category{font-size:.75rem;color:var(--primary);font-weight:600;
+                         text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+        .course-title{font-size:1rem;font-weight:700;margin-bottom:.5rem;line-height:1.4}
+        .course-instructor{font-size:.82rem;color:var(--muted);margin-bottom:.875rem}
+
+        .course-meta{display:flex;gap:1rem;font-size:.8rem;color:var(--muted);margin-bottom:.875rem}
+        .course-meta span{display:flex;align-items:center;gap:.35rem}
+
+        .progress-wrap{margin-bottom:.875rem}
+        .progress-label{display:flex;justify-content:space-between;
+                        font-size:.78rem;color:var(--muted);margin-bottom:.35rem}
+        .progress-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+        .progress-fill{height:100%;border-radius:3px;
+                       background:linear-gradient(90deg,var(--primary),var(--accent));transition:width .3s}
+
+        .course-footer{display:flex;justify-content:space-between;align-items:center}
+        .btn-enroll{padding:.5rem 1.125rem;border-radius:8px;border:none;
+                    font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+        .btn-enroll.primary{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff}
+        .btn-enroll.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+        .btn-enroll.outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+        .btn-enroll.outline:hover{border-color:var(--primary);color:var(--primary)}
+        .btn-enroll.continue{background:rgba(16,185,129,.15);color:var(--success);border:1px solid var(--success)}
+
+        /* ── Loading / Empty ── */
+        .loading{text-align:center;padding:4rem;color:var(--muted)}
+        .spinner{width:40px;height:40px;border:3px solid rgba(102,126,234,.2);
+                 border-top-color:var(--primary);border-radius:50%;
+                 animation:spin .8s linear infinite;margin:0 auto 1rem}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .empty{text-align:center;padding:4rem;color:var(--muted)}
+        .empty-icon{font-size:3rem;margin-bottom:1rem}
+
+        /* ── Toast ── */
+        .toast{position:fixed;bottom:2rem;right:2rem;padding:.875rem 1.5rem;
+               border-radius:10px;font-size:.9rem;font-weight:500;
+               transform:translateY(100px);opacity:0;transition:all .3s;z-index:999}
+        .toast.show{transform:translateY(0);opacity:1}
+        .toast.success{background:var(--success);color:#fff}
+        .toast.error{background:#ef4444;color:#fff}
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        MentMinds
+    </div>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span>Dashboard</a>
+    <a class="nav-item" href="discovery.html"><span class="nav-icon">👥</span>Mentors</a>
+    <a class="nav-item active" href="classrooms.html"><span class="nav-icon">🎓</span>Classrooms</a>
+    <a class="nav-item" href="resources.html"><span class="nav-icon">📁</span>Resources</a>
+    <a class="nav-item" href="forum.html"><span class="nav-icon">💬</span>Community</a>
+    <a class="nav-item" href="opportunities.html"><span class="nav-icon">🌟</span>Opportunities</a>
+    <button class="nav-item" onclick="logout()" style="border:none;background:transparent;text-align:left;width:100%">
+        <span class="nav-icon">🚪</span>Logout
+    </button>
+
+    <div class="sidebar-footer">
+        <div class="s-avatar" id="sAvatar">JD</div>
+        <div>
+            <div class="s-name" id="sName">Loading...</div>
+            <div class="s-id" id="sId">ID: MM-0000</div>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1>Classrooms</h1>
+            <p>Learn from industry experts. Grow at your own pace.</p>
+        </div>
+        <div class="search-bar">
+            <span>🔍</span>
+            <input type="text" id="searchInput" placeholder="Search courses...">
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <button class="filter-btn active" data-cat="">All Courses</button>
+        <button class="filter-btn" data-cat="Design">Design</button>
+        <button class="filter-btn" data-cat="Engineering">Engineering</button>
+        <button class="filter-btn" data-cat="Marketing">Marketing</button>
+        <button class="filter-btn" data-cat="Leadership">Leadership</button>
+        <span class="filter-sep">|</span>
+        <select class="level-filter" id="levelFilter">
+            <option value="">All Levels</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+        </select>
+    </div>
+
+    <!-- My courses -->
+    <div id="myCoursesSection" style="display:none">
+        <div class="section-title">Continue Learning</div>
+        <div class="courses-grid" id="myCoursesGrid"></div>
+    </div>
+
+    <!-- All courses -->
+    <div class="section-title" id="allLabel">All Courses</div>
+    <div id="loadingState" class="loading"><div class="spinner"></div><p>Loading courses...</p></div>
+    <div class="courses-grid" id="allCoursesGrid" style="display:none"></div>
+    <div id="emptyState" class="empty" style="display:none">
+        <div class="empty-icon">📚</div>
+        <p>No courses match your search.</p>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://localhost:8000/api';
+let allCourses = [];
+let myCourses  = [];
+let activeCategory = '';
+let activeLevel = '';
+
+const ICONS = {
+    Design: '🎨', Engineering: '⚛️', Marketing: '📣',
+    Leadership: '🚀', default: '📚'
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) { window.location.href = 'login.html'; return; }
+
+    // Populate sidebar
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const isMentorNav = ['mentor', 'admin'].includes((user.role || '').toLowerCase()) ||
+        localStorage.getItem('activeDashboard') === 'mentor';
+    if (isMentorNav) {
+        window.location.href = 'mentor_dashboard.html';
+        return;
+    }
+
+    if (user.full_name) {
+        document.getElementById('sAvatar').textContent =
+            user.full_name.split(' ').map(n => n[0]).join('');
+        document.getElementById('sName').textContent = user.full_name;
+        document.getElementById('sId').textContent =
+            `ID: MM-${String(user.id).padStart(4,'0')}`;
+    }
+
+    await Promise.all([loadMyCourses(), loadAllCourses()]);
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('allCoursesGrid').style.display = 'grid';
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', renderAll);
+    document.getElementById('levelFilter').addEventListener('change', e => {
+        activeLevel = e.target.value;
+        renderAll();
+    });
+
+    // Category filters
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeCategory = btn.dataset.cat;
+            renderAll();
+        });
+    });
+});
+
+async function loadMyCourses() {
+    try {
+        const r = await fetch(`${API}/classrooms/my`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+        });
+        if (r.ok) {
+            myCourses = await r.json();
+            if (myCourses.length > 0) {
+                document.getElementById('myCoursesSection').style.display = 'block';
+                document.getElementById('myCoursesGrid').innerHTML =
+                    myCourses.map(c => courseCard(c, true)).join('');
+            }
+        }
+    } catch {}
+}
+
+async function loadAllCourses() {
+    try {
+        const r = await fetch(`${API}/classrooms`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+        });
+        if (r.ok) { allCourses = await r.json(); renderAll(); }
+        else throw new Error();
+    } catch {
+        document.getElementById('loadingState').innerHTML =
+            '<p style="color:#ef4444">⚠️ Failed to load courses. Is the backend running?</p>';
+    }
+}
+
+function renderAll() {
+    const q    = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = allCourses.filter(c => {
+        const matchSearch   = !q || c.title.toLowerCase().includes(q) ||
+                              (c.instructor_name||'').toLowerCase().includes(q) ||
+                              (c.description||'').toLowerCase().includes(q);
+        const matchCategory = !activeCategory || (c.category||'') === activeCategory;
+        const matchLevel    = !activeLevel || c.level === activeLevel;
+        return matchSearch && matchCategory && matchLevel;
+    });
+
+    const grid  = document.getElementById('allCoursesGrid');
+    const empty = document.getElementById('emptyState');
+
+    if (filtered.length === 0) {
+        grid.style.display  = 'none';
+        empty.style.display = 'block';
+    } else {
+        grid.style.display  = 'grid';
+        empty.style.display = 'none';
+        grid.innerHTML = filtered.map(c => courseCard(c, false)).join('');
+    }
+}
+
+function courseCard(c, isMyCourse) {
+    const icon     = ICONS[c.category] || ICONS.default;
+    const enrolled = c.is_enrolled;
+    const pct      = c.progress || 0;
+
+    const levelClass = {beginner:'beginner',intermediate:'intermediate',advanced:'advanced'}[c.level] || 'beginner';
+
+    const progressHtml = enrolled ? `
+        <div class="progress-wrap">
+            <div class="progress-label">
+                <span>Progress</span><span>${pct}%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width:${pct}%"></div>
+            </div>
+        </div>` : '';
+
+    const btnHtml = enrolled
+        ? `<button class="btn-enroll continue" onclick="openCourse(${c.id},event)">Continue →</button>`
+        : `<button class="btn-enroll primary" onclick="enrollAndOpen(${c.id},event)">Enroll Free</button>`;
+
+    return `
+    <div class="course-card" onclick="openCourse(${c.id},event)">
+        <div class="course-thumb">
+            <span>${icon}</span>
+            <span class="course-badge badge-${levelClass}">${c.level || 'beginner'}</span>
+            ${enrolled ? '<span class="enrolled-badge">Enrolled</span>' : ''}
+        </div>
+        <div class="course-body">
+            <div class="course-category">${c.category || 'General'}</div>
+            <div class="course-title">${c.title}</div>
+            <div class="course-instructor">by ${c.instructor_name || 'MentMinds Team'}</div>
+            <div class="course-meta">
+                <span>⏱ ${c.duration_hours}h</span>
+                <span>📋 ${c.total_modules} modules</span>
+            </div>
+            ${progressHtml}
+            <div class="course-footer">
+                <span style="font-size:.8rem;color:var(--muted)">Free</span>
+                ${btnHtml}
+            </div>
+        </div>
+    </div>`;
+}
+
+async function enrollAndOpen(courseId, e) {
+    e.stopPropagation();
+    const token = localStorage.getItem('accessToken');
+    try {
+        const r = await fetch(`${API}/classrooms/${courseId}/enroll`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await r.json();
+        if (r.ok) {
+            showToast('Enrolled successfully! 🎉', 'success');
+            setTimeout(() => openCourse(courseId, e), 800);
+        } else {
+            // Already enrolled → just open
+            if (r.status === 400) openCourse(courseId, e);
+            else showToast(data.detail || 'Failed to enroll', 'error');
+        }
+    } catch { showToast('Network error', 'error'); }
+}
+
+function openCourse(courseId, e) {
+    if (e) e.stopPropagation();
+    window.location.href = `classroom_detail.html?id=${courseId}`;
+}
+
+function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
+</script>
+</body>
+</html>

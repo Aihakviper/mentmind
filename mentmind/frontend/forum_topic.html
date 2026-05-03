@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discussion - MentMinds</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#667eea;--accent:#8b5cf6;--secondary:#764ba2;
+            --success:#10b981;--warning:#f59e0b;--error:#ef4444;
+            --bg:#0f172a;--bg-light:#1e293b;--bg-card:#1e293b;--bg-card2:#243044;
+            --border:#334155;--text:#f1f5f9;--muted:#64748b;
+        }
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+             background:var(--bg);color:var(--text);min-height:100vh;padding:2rem;max-width:800px;margin:0 auto}
+
+        .back-btn{display:inline-flex;align-items:center;gap:.5rem;color:var(--muted);
+                  font-size:.875rem;text-decoration:none;margin-bottom:1.5rem;
+                  transition:color .2s;cursor:pointer}
+        .back-btn:hover{color:var(--primary)}
+
+        /* Topic */
+        .topic-card{background:var(--bg-card);border:1px solid var(--border);
+                    border-radius:14px;padding:1.75rem;margin-bottom:1.5rem}
+        .topic-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+        .author-row{display:flex;align-items:center;gap:.75rem}
+        .avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+                justify-content:center;font-weight:700;font-size:.9rem;color:#fff;flex-shrink:0}
+        .author-name{font-weight:600}
+        .post-time{font-size:.8rem;color:var(--muted)}
+        .cat-badge{padding:.3rem .75rem;border-radius:6px;font-size:.78rem;font-weight:600}
+        .topic-title{font-size:1.35rem;font-weight:700;margin-bottom:.875rem;line-height:1.4}
+        .topic-body{color:var(--muted);line-height:1.75;font-size:.925rem;margin-bottom:1.25rem}
+        .topic-actions{display:flex;align-items:center;gap:1.25rem;padding-top:1rem;
+                       border-top:1px solid var(--border)}
+        .action-btn{display:flex;align-items:center;gap:.4rem;font-size:.85rem;
+                    color:var(--muted);cursor:pointer;background:none;border:none;
+                    padding:.35rem .75rem;border-radius:8px;transition:all .2s}
+        .action-btn:hover{background:var(--bg-card2);color:var(--text)}
+        .action-btn.liked{color:var(--error)}
+
+        /* Replies */
+        .replies-header{font-size:1rem;font-weight:600;margin-bottom:1rem;
+                        display:flex;align-items:center;gap:.5rem}
+        .reply-card{background:var(--bg-card);border:1px solid var(--border);
+                    border-radius:12px;padding:1.25rem;margin-bottom:.875rem}
+        .reply-body{color:var(--muted);line-height:1.7;font-size:.9rem;margin-top:.875rem}
+
+        /* Reply form */
+        .reply-form{background:var(--bg-card);border:1px solid var(--border);
+                    border-radius:14px;padding:1.5rem;margin-top:1.5rem}
+        .reply-form h3{font-size:1rem;font-weight:600;margin-bottom:1rem}
+        .reply-form textarea{width:100%;min-height:100px;background:var(--bg-card2);
+                             border:1px solid var(--border);border-radius:10px;
+                             color:var(--text);padding:.875rem 1rem;
+                             font-size:.875rem;resize:vertical;font-family:inherit}
+        .reply-form textarea:focus{outline:none;border-color:var(--primary)}
+        .reply-submit{margin-top:.875rem;padding:.65rem 1.5rem;
+                      background:linear-gradient(135deg,var(--primary),var(--secondary));
+                      border:none;border-radius:10px;color:#fff;font-size:.875rem;
+                      font-weight:600;cursor:pointer;transition:all .2s}
+        .reply-submit:hover{transform:translateY(-1px)}
+        .reply-submit:disabled{opacity:.5;cursor:not-allowed}
+
+        .loading{text-align:center;padding:4rem;color:var(--muted)}
+        .spinner{width:40px;height:40px;border:3px solid rgba(102,126,234,.2);
+                 border-top-color:var(--primary);border-radius:50%;
+                 animation:spin .8s linear infinite;margin:0 auto 1rem}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        .toast{position:fixed;bottom:2rem;right:2rem;padding:.875rem 1.5rem;
+               border-radius:10px;font-size:.875rem;font-weight:500;
+               transform:translateY(100px);opacity:0;transition:all .3s;z-index:9999}
+        .toast.show{transform:translateY(0);opacity:1}
+        .toast.success{background:var(--success);color:#fff}
+        .toast.error{background:var(--error);color:#fff}
+    </style>
+</head>
+<body>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <div class="back-btn" onclick="window.location.href='forum.html'" style="margin-bottom:0">← Back to Forum</div>
+        <button class="back-btn" onclick="logout()" style="background:none;border:none;margin-bottom:0">Logout</button>
+    </div>
+
+    <div id="loadingState" class="loading"><div class="spinner"></div><p>Loading discussion...</p></div>
+    <div id="content" style="display:none"></div>
+
+    <div class="toast" id="toast"></div>
+
+<script>
+const API     = 'http://localhost:8000/api';
+const token   = localStorage.getItem('accessToken');
+const topicId = new URLSearchParams(window.location.search).get('id');
+
+const COLORS  = ['#667eea','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+const CAT_COLORS = {
+    'Career Advice':'background:rgba(102,126,234,.2);color:#667eea',
+    'Technical Skills':'background:rgba(16,185,129,.2);color:#10b981',
+    'Soft Skills':'background:rgba(245,158,11,.2);color:#f59e0b',
+    'Scholarships':'background:rgba(139,92,246,.2);color:#8b5cf6',
+    'General':'background:rgba(100,116,139,.2);color:#64748b',
+};
+
+if (!token) { window.location.href = 'login.html'; }
+if (!topicId) { window.location.href = 'forum.html'; }
+
+document.addEventListener('DOMContentLoaded', loadTopic);
+
+async function loadTopic() {
+    try {
+        const r = await fetch(`${API}/forum/topics/${topicId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!r.ok) throw new Error();
+
+        const t = await r.json();
+        document.title = `${t.title} - MentMinds`;
+        render(t);
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('content').style.display      = 'block';
+    } catch {
+        document.getElementById('loadingState').innerHTML =
+            '<p style="color:var(--error)">⚠️ Failed to load topic. <a href="forum.html" style="color:var(--primary)">Go back</a></p>';
+    }
+}
+
+function avatar(name, id) {
+    const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase();
+    const color    = COLORS[id % COLORS.length];
+    return `<div class="avatar" style="background:${color}">${initials}</div>`;
+}
+
+function render(t) {
+    const catStyle = CAT_COLORS[t.category] || CAT_COLORS['General'];
+    const repliesHtml = t.replies.map(r => `
+        <div class="reply-card">
+            <div class="author-row">
+                ${avatar(r.author.full_name, r.author.id)}
+                <div>
+                    <div class="author-name">${r.author.full_name}
+                        <span style="font-size:.75rem;color:var(--muted);font-weight:400;
+                              background:rgba(102,126,234,.1);padding:.1rem .4rem;border-radius:4px;margin-left:.35rem">
+                            ${r.author.role}
+                        </span>
+                    </div>
+                    <div class="post-time">${r.time_ago}</div>
+                </div>
+            </div>
+            <div class="reply-body">${r.body}</div>
+        </div>`
+    ).join('');
+
+    document.getElementById('content').innerHTML = `
+        <!-- Main topic -->
+        <div class="topic-card">
+            <div class="topic-header">
+                <div class="author-row">
+                    ${avatar(t.author.full_name, t.author.id)}
+                    <div>
+                        <div class="author-name">${t.author.full_name}</div>
+                        <div class="post-time">${t.time_ago}</div>
+                    </div>
+                </div>
+                <span class="cat-badge" style="${catStyle}">${t.category}</span>
+            </div>
+            <div class="topic-title">${t.title}</div>
+            <div class="topic-body">${t.body}</div>
+            <div class="topic-actions">
+                <button class="action-btn ${t.liked_by_me ? 'liked' : ''}"
+                        id="likeBtn" onclick="toggleLike()">
+                    ♥ <span id="likeCount">${t.like_count}</span> Likes
+                </button>
+                <span class="action-btn">💬 ${t.reply_count} Replies</span>
+                <span class="action-btn">👁 ${t.views} Views</span>
+            </div>
+        </div>
+
+        <!-- Replies -->
+        <div class="replies-header">💬 ${t.replies.length} ${t.replies.length === 1 ? 'Reply' : 'Replies'}</div>
+        <div id="repliesList">${repliesHtml || '<p style="color:var(--muted);text-align:center;padding:2rem">No replies yet. Be the first!</p>'}</div>
+
+        <!-- Reply form -->
+        <div class="reply-form">
+            <h3>💬 Add Your Reply</h3>
+            <textarea id="replyBody" placeholder="Share your thoughts, tips, or resources..."></textarea>
+            <button class="reply-submit" id="replyBtn" onclick="submitReply()">Post Reply</button>
+        </div>
+    `;
+}
+
+async function toggleLike() {
+    try {
+        const r = await fetch(`${API}/forum/topics/${topicId}/like`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!r.ok) return;
+        const data = await r.json();
+        const btn  = document.getElementById('likeBtn');
+        const cnt  = document.getElementById('likeCount');
+        data.liked ? btn.classList.add('liked') : btn.classList.remove('liked');
+        cnt.textContent = data.like_count;
+    } catch {}
+}
+
+async function submitReply() {
+    const body = document.getElementById('replyBody').value.trim();
+    if (!body) { showToast('Please write a reply first', 'error'); return; }
+
+    const btn = document.getElementById('replyBtn');
+    btn.disabled    = true;
+    btn.textContent = 'Posting...';
+
+    try {
+        const r = await fetch(`${API}/forum/topics/${topicId}/reply`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ body })
+        });
+        const data = await r.json();
+
+        if (r.ok) {
+            document.getElementById('replyBody').value = '';
+            showToast('Reply posted! ✅', 'success');
+            // Append new reply without reload
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const newReply = `
+                <div class="reply-card">
+                    <div class="author-row">
+                        <div class="avatar" style="background:#667eea">
+                            ${(user.full_name||'U').split(' ').map(n=>n[0]).join('')}
+                        </div>
+                        <div>
+                            <div class="author-name">${user.full_name || 'You'}</div>
+                            <div class="post-time">just now</div>
+                        </div>
+                    </div>
+                    <div class="reply-body">${body}</div>
+                </div>`;
+            const list = document.getElementById('repliesList');
+            if (list.querySelector('p')) list.innerHTML = ''; // clear "no replies" msg
+            list.insertAdjacentHTML('beforeend', newReply);
+        } else {
+            showToast(data.detail || 'Failed to post reply', 'error');
+        }
+    } catch { showToast('Network error', 'error'); }
+
+    btn.disabled    = false;
+    btn.textContent = 'Post Reply';
+}
+
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
+</script>
+</body>
+</html>

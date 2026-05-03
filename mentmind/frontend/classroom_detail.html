@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom - MentMinds</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#667eea;--accent:#8b5cf6;--secondary:#764ba2;
+            --success:#10b981;--warning:#f59e0b;
+            --bg:#0f172a;--bg-light:#1e293b;--bg-card:#1a2744;--bg-card2:#243044;
+            --border:#334155;--text:#f1f5f9;--muted:#64748b;
+        }
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+             background:var(--bg);color:var(--text);min-height:100vh}
+
+        /* ── Top bar ── */
+        .topbar{display:flex;align-items:center;justify-content:space-between;
+                padding:.875rem 1.5rem;background:var(--bg-light);
+                border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+        .logo{display:flex;align-items:center;gap:.75rem;font-weight:700;font-size:1.05rem;
+              text-decoration:none;color:var(--text)}
+        .logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--primary));
+                   border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+        .breadcrumb{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--muted)}
+        .breadcrumb a{color:var(--muted);text-decoration:none}
+        .breadcrumb a:hover{color:var(--primary)}
+        .breadcrumb span{color:var(--text);font-weight:500}
+        .topbar-actions{display:flex;align-items:center;gap:.75rem}
+        .status-badge{padding:.35rem .875rem;border-radius:20px;font-size:.8rem;font-weight:600;
+                      background:rgba(245,158,11,.15);color:var(--warning);border:1px solid var(--warning)}
+        .status-badge.completed{background:rgba(16,185,129,.15);color:var(--success);border-color:var(--success)}
+        .bookmark-btn{width:36px;height:36px;border-radius:8px;background:var(--bg-card);
+                      border:1px solid var(--border);display:flex;align-items:center;
+                      justify-content:center;cursor:pointer;font-size:1.1rem;transition:all .2s}
+        .bookmark-btn:hover{border-color:var(--primary)}
+
+        /* ── Layout ── */
+        .layout{display:grid;grid-template-columns:1fr 360px;min-height:calc(100vh - 57px)}
+
+        /* ── Left - video + content ── */
+        .content-area{padding:1.5rem;overflow-y:auto}
+
+        /* ── Video player ── */
+        .video-wrap{position:relative;background:#000;border-radius:12px;
+                    overflow:hidden;margin-bottom:1.25rem;aspect-ratio:16/9}
+        .video-placeholder{width:100%;height:100%;background:linear-gradient(135deg,#0d1b2e,#1a3a5c);
+                           display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+        .video-icon{font-size:4rem;opacity:.4}
+        .video-title-overlay{font-size:.9rem;color:rgba(255,255,255,.5);text-align:center;padding:0 2rem}
+
+        /* Play button */
+        .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+                  width:70px;height:70px;border-radius:50%;
+                  background:rgba(255,255,255,.15);backdrop-filter:blur(8px);
+                  border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;
+                  justify-content:center;cursor:pointer;transition:all .2s;font-size:1.5rem}
+        .play-btn:hover{background:rgba(255,255,255,.25);transform:translate(-50%,-50%) scale(1.05)}
+
+        /* Progress bar */
+        .video-controls{position:absolute;bottom:0;left:0;right:0;padding:.75rem 1rem;
+                        background:linear-gradient(transparent,rgba(0,0,0,.8))}
+        .video-seekbar{width:100%;height:4px;background:rgba(255,255,255,.2);
+                       border-radius:2px;margin-bottom:.5rem;cursor:pointer;position:relative}
+        .video-seekbar-fill{height:100%;background:var(--primary);border-radius:2px;width:70%}
+        .video-time{font-size:.78rem;color:rgba(255,255,255,.7);text-align:right}
+
+        /* ── Tabs ── */
+        .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
+        .tab{padding:.75rem 1.25rem;border:none;background:transparent;color:var(--muted);
+             font-size:.9rem;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-weight:500}
+        .tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+        .tab:hover:not(.active){color:var(--text)}
+
+        /* ── Tab content ── */
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+
+        /* Overview */
+        .about-title{font-size:1.1rem;font-weight:600;margin-bottom:.75rem}
+        .about-text{color:var(--muted);line-height:1.7;font-size:.9rem;margin-bottom:1.5rem}
+
+        .action-cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+        .action-card{background:var(--bg-card);border:1px solid var(--border);
+                     border-radius:10px;padding:1rem;display:flex;align-items:center;
+                     gap:.875rem;cursor:pointer;transition:all .2s}
+        .action-card:hover{border-color:var(--primary);background:var(--bg-card2)}
+        .action-card-icon{width:40px;height:40px;border-radius:8px;display:flex;
+                          align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+        .icon-blue{background:rgba(102,126,234,.15)}
+        .icon-green{background:rgba(16,185,129,.15)}
+        .action-card-label{font-weight:600;font-size:.875rem;margin-bottom:.2rem}
+        .action-card-sub{font-size:.78rem;color:var(--muted)}
+
+        /* Notes */
+        .notes-area textarea{width:100%;min-height:200px;background:var(--bg-card);
+                              border:1px solid var(--border);border-radius:10px;color:var(--text);
+                              padding:1rem;font-size:.875rem;resize:vertical;font-family:inherit}
+        .notes-area textarea:focus{outline:none;border-color:var(--primary)}
+        .notes-save{margin-top:.75rem;padding:.6rem 1.25rem;background:var(--primary);
+                    border:none;border-radius:8px;color:#fff;font-weight:600;
+                    cursor:pointer;font-size:.875rem}
+
+        /* Module list in transcript tab */
+        .module-item{display:flex;align-items:center;gap:1rem;padding:.875rem;
+                     background:var(--bg-card);border-radius:10px;margin-bottom:.5rem;
+                     cursor:pointer;transition:all .2s;border:1px solid transparent}
+        .module-item:hover{border-color:var(--primary)}
+        .module-item.active{border-color:var(--primary);background:var(--bg-card2)}
+        .module-num{width:32px;height:32px;border-radius:50%;background:var(--bg-card2);
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:.8rem;font-weight:600;flex-shrink:0;color:var(--muted)}
+        .module-item.active .module-num,
+        .module-item.done .module-num{background:var(--primary);color:#fff}
+        .module-item.done .module-num::after{content:'✓'}
+        .module-info{flex:1}
+        .module-name{font-size:.875rem;font-weight:500}
+        .module-dur{font-size:.78rem;color:var(--muted);margin-top:.15rem}
+        .module-check{font-size:.9rem;color:var(--muted)}
+        .module-item.done .module-check{color:var(--success)}
+
+        /* ── Right sidebar - AI Tutor ── */
+        .right-panel{background:var(--bg-light);border-left:1px solid var(--border);
+                     display:flex;flex-direction:column}
+
+        .ai-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);
+                   display:flex;align-items:center;justify-content:space-between}
+        .ai-title{display:flex;align-items:center;gap:.625rem;font-weight:600;font-size:.95rem}
+        .ai-avatar{width:30px;height:30px;border-radius:50%;
+                   background:linear-gradient(135deg,var(--accent),var(--primary));
+                   display:flex;align-items:center;justify-content:center;font-size:.85rem}
+        .ai-close{cursor:pointer;color:var(--muted);font-size:1.1rem}
+        .ai-close:hover{color:var(--text)}
+
+        .ai-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.875rem}
+        .msg{max-width:88%;padding:.75rem 1rem;border-radius:12px;font-size:.855rem;line-height:1.55}
+        .msg.ai{background:var(--bg-card2);align-self:flex-start;border-bottom-left-radius:4px}
+        .msg.user{background:linear-gradient(135deg,var(--primary),var(--secondary));
+                  color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+
+        .ai-input-row{padding:.875rem;border-top:1px solid var(--border);display:flex;gap:.625rem}
+        .ai-input{flex:1;padding:.65rem 1rem;background:var(--bg-card);
+                  border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.875rem}
+        .ai-input:focus{outline:none;border-color:var(--primary)}
+        .ai-send{width:38px;height:38px;border-radius:10px;border:none;
+                 background:var(--primary);color:#fff;cursor:pointer;font-size:1rem;
+                 display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+        .ai-send:hover{background:var(--accent)}
+        .ai-send:disabled{opacity:.5;cursor:not-allowed}
+
+        /* ── Downloads section ── */
+        .downloads-section{padding:1rem 1.25rem;border-top:1px solid var(--border)}
+        .dl-title{font-weight:600;font-size:.875rem;margin-bottom:.75rem}
+        .dl-item{display:flex;align-items:center;gap:.75rem;padding:.625rem;
+                 border-radius:8px;cursor:pointer;transition:all .2s;margin-bottom:.375rem}
+        .dl-item:hover{background:var(--bg-card2)}
+        .dl-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;
+                 justify-content:center;font-size:1rem;flex-shrink:0}
+        .icon-pdf{background:rgba(239,68,68,.15)}
+        .icon-xlsx{background:rgba(16,185,129,.15)}
+        .icon-zip{background:rgba(245,158,11,.15)}
+        .dl-info{flex:1}
+        .dl-name{font-size:.82rem;font-weight:500;margin-bottom:.1rem}
+        .dl-meta{font-size:.75rem;color:var(--muted)}
+        .dl-btn{font-size:1rem;color:var(--muted)}
+        .dl-btn:hover{color:var(--primary)}
+
+        /* Complete button */
+        .complete-btn{margin:0 1.25rem .875rem;padding:.75rem;
+                      background:linear-gradient(135deg,var(--success),#34d399);
+                      border:none;border-radius:10px;color:#fff;font-weight:600;
+                      cursor:pointer;width:calc(100% - 2.5rem);font-size:.9rem;transition:all .2s}
+        .complete-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,185,129,.4)}
+        .complete-btn.done{background:var(--bg-card);color:var(--success);border:1px solid var(--success)}
+
+        /* Loading */
+        .loading{display:flex;flex-direction:column;align-items:center;
+                 justify-content:center;height:60vh;color:var(--muted);gap:1rem}
+        .spinner{width:40px;height:40px;border:3px solid rgba(102,126,234,.2);
+                 border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        @media(max-width:900px){.layout{grid-template-columns:1fr}.right-panel{display:none}}
+    </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+    <div style="display:flex;align-items:center;gap:2rem">
+        <a class="logo" href="classrooms.html">
+            <div class="logo-icon">🎓</div>
+            MentMinds
+        </a>
+        <div class="breadcrumb">
+            <a href="classrooms.html">Classrooms</a>
+            <span>›</span>
+            <span id="breadcrumbCourse">Loading...</span>
+        </div>
+    </div>
+    <div class="topbar-actions">
+        <div class="status-badge" id="statusBadge">In Progress</div>
+        <div class="bookmark-btn">🔖</div>
+        <button class="bookmark-btn" onclick="logout()" title="Logout" style="color:var(--text)">🚪</button>
+    </div>
+</div>
+
+<!-- Loading -->
+<div class="loading" id="loadingState">
+    <div class="spinner"></div>
+    <p>Loading classroom...</p>
+</div>
+
+<!-- Main layout -->
+<div class="layout" id="mainLayout" style="display:none">
+
+    <!-- ── Left: video + content ── -->
+    <div class="content-area">
+
+        <!-- Video player -->
+        <div class="video-wrap">
+            <div class="video-placeholder">
+                <div class="video-icon">🎬</div>
+                <div class="video-title-overlay" id="videoModuleTitle">Select a module to start watching</div>
+            </div>
+            <div class="play-btn" id="playBtn" onclick="togglePlay()">▶</div>
+            <div class="video-controls">
+                <div class="video-seekbar">
+                    <div class="video-seekbar-fill" id="seekbarFill"></div>
+                </div>
+                <div class="video-time" id="videoTime">0:00 / 0:00</div>
+            </div>
+        </div>
+
+        <!-- Module subtitle -->
+        <div style="margin-bottom:1.25rem;font-size:.85rem;color:var(--muted)" id="moduleSubtitle">
+            Select a module from the transcript tab to begin
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('overview',this)">Overview</button>
+            <button class="tab" onclick="switchTab('notes',this)">Notes</button>
+            <button class="tab" onclick="switchTab('transcript',this)">Modules</button>
+            <button class="tab" onclick="switchTab('reviews',this)">Reviews</button>
+        </div>
+
+        <!-- Overview tab -->
+        <div class="tab-content active" id="tab-overview">
+            <div class="about-title">About this lesson</div>
+            <div class="about-text" id="courseDescription">Loading...</div>
+
+            <div class="action-cards" id="classworkCards">
+                <div class="action-card">
+                    <div class="action-card-icon icon-blue">📋</div>
+                    <div>
+                        <div class="action-card-label">Classwork</div>
+                        <div class="action-card-sub">Loading assignments and quizzes...</div>
+                    </div>
+                </div>
+                <div class="action-card">
+                    <div class="action-card-icon icon-green">❓</div>
+                    <div>
+                        <div class="action-card-label">Course Quiz</div>
+                        <div class="action-card-sub">Loading mentor quiz...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes tab -->
+        <div class="tab-content" id="tab-notes">
+            <div class="notes-area">
+                <textarea id="notesArea" placeholder="Take notes here while watching..."></textarea>
+                <button class="notes-save" onclick="saveNotes()">💾 Save Notes</button>
+            </div>
+        </div>
+
+        <!-- Modules/Transcript tab -->
+        <div class="tab-content" id="tab-transcript">
+            <div id="moduleList"></div>
+        </div>
+
+        <!-- Reviews tab -->
+        <div class="tab-content" id="tab-reviews">
+            <div style="color:var(--muted);padding:2rem;text-align:center">
+                <div style="font-size:2rem;margin-bottom:.5rem">⭐</div>
+                <p>Reviews coming soon!</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Right: AI Tutor + Downloads ── -->
+    <div class="right-panel">
+        <!-- AI Tutor header -->
+        <div class="ai-header">
+            <div class="ai-title">
+                <div class="ai-avatar">🤖</div>
+                AI Learning Tutor
+            </div>
+            <span class="ai-close">✕</span>
+        </div>
+
+        <!-- Messages -->
+        <div class="ai-messages" id="aiMessages">
+            <div class="msg ai" id="welcomeMsg">
+                Hello! I'm your AI learning tutor. I can answer questions about this course,
+                summarize key concepts, or help you understand anything you're stuck on.
+            </div>
+        </div>
+
+        <!-- Complete lesson button -->
+        <button class="complete-btn" id="completeBtn" onclick="completeLesson()">
+            ✅ Mark Lesson as Complete
+        </button>
+
+        <!-- Input -->
+        <div class="ai-input-row">
+            <input class="ai-input" id="aiInput" placeholder="Ask your AI tutor..."
+                   onkeydown="if(event.key==='Enter')sendMessage()">
+            <button class="ai-send" id="aiSendBtn" onclick="sendMessage()">➤</button>
+        </div>
+
+        <!-- Downloads -->
+        <div class="downloads-section">
+            <div class="dl-title">Downloads</div>
+            <div class="dl-item">
+                <div class="dl-icon icon-pdf">📄</div>
+                <div class="dl-info">
+                    <div class="dl-name">Design_System_Guide.pdf</div>
+                    <div class="dl-meta">4.2 MB • PDF</div>
+                </div>
+                <span class="dl-btn">⬇</span>
+            </div>
+            <div class="dl-item">
+                <div class="dl-icon icon-xlsx">📊</div>
+                <div class="dl-info">
+                    <div class="dl-name">Token_Structure.xlsx</div>
+                    <div class="dl-meta">1.1 MB • Excel</div>
+                </div>
+                <span class="dl-btn">⬇</span>
+            </div>
+            <div class="dl-item">
+                <div class="dl-icon icon-zip">📦</div>
+                <div class="dl-info">
+                    <div class="dl-name">Asset_Pack_v1.zip</div>
+                    <div class="dl-meta">25 MB • ZIP</div>
+                </div>
+                <span class="dl-btn">⬇</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const API   = 'http://localhost:8000/api';
+const token = localStorage.getItem('accessToken');
+const user  = JSON.parse(localStorage.getItem('user') || '{}');
+
+let course        = null;
+let currentModule = null;
+let isPlaying     = false;
+let notes         = {};      // { moduleId: text }
+
+// Get course ID from URL
+const courseId = new URLSearchParams(window.location.search).get('id');
+
+if (!token) { window.location.href = 'login.html'; }
+if (['mentor', 'admin'].includes((user.role || '').toLowerCase()) ||
+    localStorage.getItem('activeDashboard') === 'mentor') {
+    window.location.href = 'mentor_dashboard.html';
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (['mentor', 'admin'].includes((user.role || '').toLowerCase()) ||
+        localStorage.getItem('activeDashboard') === 'mentor') {
+        window.location.href = 'mentor_dashboard.html';
+        return;
+    }
+    if (!courseId) { window.location.href = 'classrooms.html'; return; }
+    await loadCourse();
+    loadNotes();
+});
+
+async function loadCourse() {
+    try {
+        const r = await fetch(`${API}/classrooms/${courseId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (r.status === 401) { localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (!r.ok) throw new Error();
+
+        course = await r.json();
+
+        // Update UI
+        document.getElementById('breadcrumbCourse').textContent = course.title;
+        document.getElementById('courseDescription').textContent =
+            course.description || 'No description available.';
+
+        // Status badge
+        const badge = document.getElementById('statusBadge');
+        if (course.progress === 100) {
+            badge.textContent = '✅ Completed';
+            badge.classList.add('completed');
+        } else if (course.progress > 0) {
+            badge.textContent = `${course.progress}% Complete`;
+        }
+
+        // Auto-enroll if not enrolled
+        if (!course.is_enrolled) {
+            await fetch(`${API}/classrooms/${courseId}/enroll`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        }
+
+        renderModules();
+        updateWelcomeMessage();
+        await loadClasswork();
+
+        document.getElementById('loadingState').style.display  = 'none';
+        document.getElementById('mainLayout').style.display    = 'grid';
+
+        // Load notes from localStorage
+        const saved = localStorage.getItem(`notes_${courseId}`);
+        if (saved) document.getElementById('notesArea').value = saved;
+
+        // Auto-select first incomplete module
+        const first = course.modules?.find(m => !m.completed) || course.modules?.[0];
+        if (first) selectModule(first);
+
+    } catch {
+        document.getElementById('loadingState').innerHTML =
+            '<p style="color:#ef4444">⚠️ Failed to load course. <a href="classrooms.html" style="color:var(--primary)">Go back</a></p>';
+    }
+}
+
+function renderModules() {
+    const list = course.modules || [];
+    document.getElementById('moduleList').innerHTML = list.map((m, i) => `
+        <div class="module-item ${m.completed ? 'done' : ''}" id="mod-${m.id}"
+             onclick="selectModule(${JSON.stringify(m).replace(/"/g,'&quot;')})">
+            <div class="module-num">${m.completed ? '' : i + 1}</div>
+            <div class="module-info">
+                <div class="module-name">${m.title}</div>
+                <div class="module-dur">⏱ ${m.duration_minutes} min</div>
+            </div>
+            <span class="module-check">${m.completed ? '✅' : '○'}</span>
+        </div>
+    `).join('');
+}
+
+function selectModule(m) {
+    currentModule = m;
+
+    // Highlight active
+    document.querySelectorAll('.module-item').forEach(el => el.classList.remove('active'));
+    const el = document.getElementById(`mod-${m.id}`);
+    if (el) el.classList.add('active');
+
+    // Update video area
+    document.getElementById('videoModuleTitle').textContent = m.title;
+    document.getElementById('moduleSubtitle').textContent =
+        `Module ${m.order} • ${m.duration_minutes} min`;
+
+    // Reset player
+    isPlaying = false;
+    document.getElementById('playBtn').textContent = '▶';
+    document.getElementById('seekbarFill').style.width = m.completed ? '100%' : '0%';
+    document.getElementById('videoTime').textContent =
+        `0:00 / ${Math.floor(m.duration_minutes)}:00`;
+
+    // Update complete button
+    const btn = document.getElementById('completeBtn');
+    if (m.completed) {
+        btn.textContent = '✅ Completed';
+        btn.classList.add('done');
+    } else {
+        btn.textContent = '✅ Mark Lesson as Complete';
+        btn.classList.remove('done');
+    }
+
+    // Load notes for this module
+    const saved = localStorage.getItem(`notes_${courseId}_${m.id}`);
+    document.getElementById('notesArea').value = saved || '';
+
+    // Tutor context message
+    appendMessage('ai',
+        `I see you're now watching "${m.title}". Feel free to ask me anything about this module!`
+    );
+}
+
+function togglePlay() {
+    isPlaying = !isPlaying;
+    document.getElementById('playBtn').textContent = isPlaying ? '⏸' : '▶';
+
+    if (isPlaying && currentModule) {
+        // Simulate progress
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress = Math.min(progress + 1, 100);
+            document.getElementById('seekbarFill').style.width = `${progress}%`;
+            const totalSec = currentModule.duration_minutes * 60;
+            const watchSec = Math.floor(totalSec * (progress / 100));
+            document.getElementById('videoTime').textContent =
+                `${fmt(watchSec)} / ${fmt(totalSec)}`;
+            if (!isPlaying || progress >= 100) clearInterval(interval);
+        }, 200);
+    }
+}
+
+function fmt(s) {
+    return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+function updateWelcomeMessage() {
+    const first = user.full_name?.split(' ')[0] || 'there';
+    const mod   = course.modules?.[0]?.title || 'this module';
+    document.getElementById('welcomeMsg').textContent =
+        `Hello ${first}! I noticed you're watching "${mod}". ` +
+        `Would you like a summary of the key principles discussed so far?`;
+}
+
+async function loadClasswork() {
+    const [assignmentsRes, quizzesRes] = await Promise.all([
+        fetch(`${API}/classrooms/assignments?course_id=${courseId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`${API}/classrooms/quizzes?course_id=${courseId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+    ]);
+
+    const assignments = assignmentsRes.ok ? await assignmentsRes.json() : [];
+    const quizzes = quizzesRes.ok ? await quizzesRes.json() : [];
+    const cards = [
+        ...assignments.map(a => ({
+            iconClass: 'icon-blue',
+            icon: '📋',
+            title: a.title,
+            sub: `${a.points || 0} points${a.due_at ? ' · due ' + new Date(a.due_at).toLocaleDateString() : ''}`
+        })),
+        ...quizzes.map(q => ({
+            iconClass: 'icon-green',
+            icon: '?',
+            title: q.title,
+            sub: `${q.questions?.length || 0} questions · ${q.time_limit_minutes || 0} min`
+        }))
+    ];
+
+    document.getElementById('classworkCards').innerHTML = cards.length
+        ? cards.map(card => `
+            <div class="action-card">
+                <div class="action-card-icon ${card.iconClass}">${card.icon}</div>
+                <div>
+                    <div class="action-card-label">${escapeHtml(card.title)}</div>
+                    <div class="action-card-sub">${escapeHtml(card.sub)}</div>
+                </div>
+            </div>`).join('')
+        : `<div class="action-card">
+            <div class="action-card-icon icon-blue">📋</div>
+            <div>
+                <div class="action-card-label">No classwork yet</div>
+                <div class="action-card-sub">Your mentor has not added assignments or quizzes.</div>
+            </div>
+        </div>`;
+}
+
+function escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    }[ch]));
+}
+
+async function completeLesson() {
+    if (!currentModule || currentModule.completed) return;
+
+    const btn = document.getElementById('completeBtn');
+    btn.textContent = '⏳ Saving...';
+    btn.disabled = true;
+
+    try {
+        const r = await fetch(`${API}/classrooms/${courseId}/progress`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                module_id:  currentModule.id,
+                completed:  true,
+                watch_time: currentModule.duration_minutes * 60,
+            }),
+        });
+
+        const data = await r.json();
+
+        if (r.ok) {
+            currentModule.completed = true;
+
+            // Update the module in course data
+            const idx = course.modules.findIndex(m => m.id === currentModule.id);
+            if (idx !== -1) course.modules[idx].completed = true;
+
+            btn.textContent = '✅ Completed';
+            btn.classList.add('done');
+            btn.disabled = false;
+
+            renderModules();
+
+            // Update status badge
+            const badge = document.getElementById('statusBadge');
+            badge.textContent = data.course_progress === 100
+                ? '✅ Completed'
+                : `${data.course_progress}% Complete`;
+            if (data.course_progress === 100) badge.classList.add('completed');
+
+            appendMessage('ai',
+                `Great job completing "${currentModule.title}"! 🎉 ` +
+                `Your overall progress is now ${data.course_progress}%.`
+            );
+        }
+    } catch {
+        btn.textContent = '✅ Mark Lesson as Complete';
+        btn.disabled = false;
+    }
+}
+
+// ── Tabs ────────────────────────────────────────────────────────────────────
+
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+// ── Notes ───────────────────────────────────────────────────────────────────
+
+function saveNotes() {
+    const key = currentModule
+        ? `notes_${courseId}_${currentModule.id}`
+        : `notes_${courseId}`;
+    localStorage.setItem(key, document.getElementById('notesArea').value);
+    appendMessage('ai', 'Your notes have been saved locally. 📝');
+}
+
+function loadNotes() {
+    const saved = localStorage.getItem(`notes_${courseId}`);
+    if (saved) document.getElementById('notesArea').value = saved;
+}
+
+// ── AI Tutor ────────────────────────────────────────────────────────────────
+
+function appendMessage(role, text) {
+    const box = document.getElementById('aiMessages');
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.textContent = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
+
+async function sendMessage() {
+    const input = document.getElementById('aiInput');
+    const msg   = input.value.trim();
+    if (!msg) return;
+
+    appendMessage('user', msg);
+    input.value = '';
+
+    const btn = document.getElementById('aiSendBtn');
+    btn.disabled = true;
+
+    // Simple context-aware responses (replace with real AI API later)
+    const moduleTitle  = currentModule?.title || 'this course';
+    const courseTitle  = course?.title || 'this course';
+
+    const responses = [
+        `Great question about "${moduleTitle}"! In design systems, the key principle is consistency — every component should follow the same rules for spacing, color, and typography.`,
+        `When studying "${courseTitle}", I recommend taking notes on the core concepts and practicing with real projects. What specific part are you finding challenging?`,
+        `That's a common question! The difference is important: components are reusable UI elements, while patterns are documented best practices for combining them.`,
+        `Excellent thinking! Let me break that down: first understand the theory, then apply it immediately in a small project. Practice is key! 💪`,
+        `I'm glad you asked. In the context of "${moduleTitle}", this concept connects to the broader principle of atomic design — building complex UIs from simple, reusable parts.`,
+    ];
+
+    setTimeout(() => {
+        const reply = responses[Math.floor(Math.random() * responses.length)];
+        appendMessage('ai', reply);
+        btn.disabled = false;
+    }, 1000);
+}
+</script>
+</body>
+</html>

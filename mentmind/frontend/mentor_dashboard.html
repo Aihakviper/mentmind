@@ -121,6 +121,27 @@
                       font-weight:500;transition:all .2s}
         .btn-generate:hover{border-color:var(--primary);color:var(--primary)}
 
+        .mentor-tools{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem}
+        .tool-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1rem}
+        .tool-card h3{font-size:.95rem;margin-bottom:.75rem}
+        .tool-card input,.tool-card select,.tool-card textarea{
+            width:100%;margin-bottom:.65rem;padding:.65rem .75rem;border-radius:8px;
+            border:1px solid var(--border);background:var(--bg-card2);color:var(--text);
+            font:inherit;font-size:.85rem
+        }
+        .tool-card textarea{min-height:78px;resize:vertical}
+        .tool-card .btn{width:100%;justify-content:center}
+        .mini-list{display:grid;gap:.65rem;margin-top:.75rem}
+        .mini-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:.75rem}
+        .mini-title{font-weight:600;font-size:.85rem}
+        .mini-meta{color:var(--text-muted);font-size:.76rem;margin-top:.2rem}
+        .toast{position:fixed;right:1.5rem;bottom:1.5rem;padding:.8rem 1rem;border-radius:10px;
+               background:var(--primary);color:#fff;font-weight:600;font-size:.85rem;
+               transform:translateY(120px);opacity:0;transition:all .2s;z-index:999}
+        .toast.show{transform:translateY(0);opacity:1}
+        .toast.error{background:var(--error)}
+        .toast.success{background:var(--success)}
+
         /* ── Loading ── */
         .loading{text-align:center;padding:4rem 2rem;color:var(--text-muted)}
         .spinner{width:44px;height:44px;border:4px solid rgba(102,126,234,.2);
@@ -129,6 +150,7 @@
         @keyframes spin{to{transform:rotate(360deg)}}
 
         @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:1100px){.mentor-tools{grid-template-columns:1fr}}
         @media(max-width:900px){.content-grid{grid-template-columns:1fr}}
     </style>
 </head>
@@ -139,20 +161,25 @@
     <div class="logo">
         <div class="logo-icon">🎓</div>
         MentMinds
+     
     </div>
     <a class="nav-item active" href="#"><span class="nav-icon">📊</span>Dashboard</a>
     <a class="nav-item" href="#"><span class="nav-icon">👥</span>My Mentees</a>
-    <a class="nav-item" href="#"><span class="nav-icon">🎓</span>Classrooms</a>
-    <a class="nav-item" href="#"><span class="nav-icon">📁</span>Resources</a>
-    <a class="nav-item" href="#"><span class="nav-icon">📈</span>Engagement</a>
-
+    <a class="nav-item" href="resources.html"><span class="nav-icon">📁</span>Resources</a>
+    <a class="nav-item" href="forum.html"><span class="nav-icon">📈</span>Engagement</a>
+    <a class="nav-item" href="opportunities.html"><span class="nav-icon">🌟</span>Opportunities</a>
+    <button class="logout-btn" onclick="logout()" style="margin-top: auto; display: flex; align-items: center; gap: 10px; background: none; border: none; color: var(--error); cursor: pointer; padding: 1rem; font-weight: 600;">
+        <span>🚪</span> Logout
+    </button>
     <div class="sidebar-footer">
         <div class="avatar" id="sidebarAvatar">JD</div>
         <div class="footer-info">
             <div class="footer-name" id="sidebarName">Loading...</div>
             <div class="footer-id" id="sidebarId">ID: MM-0000</div>
         </div>
-        <span class="settings-btn" onclick="logout()" title="Logout">🚪</span>
+       <nav style="display:flex; flex-direction:column; gap:0.5rem; flex-grow:1;">
+        </nav>
+  
     </div>
 </div>
 
@@ -175,8 +202,8 @@
                 <p id="pageSubtitle">Welcome back. You have 0 sessions today.</p>
             </div>
             <div class="header-actions">
-                <button class="btn btn-outline">➕ Upload Resource</button>
-                <button class="btn btn-primary">▶ Start Session</button>
+                <button class="btn btn-outline" onclick="focusTool('resourceTitle')">Upload Resource</button>
+                <button class="btn btn-primary" onclick="focusTool('courseTitle')">Create Class</button>
             </div>
         </div>
 
@@ -203,9 +230,68 @@
             <div class="stat-card">
                 <div class="stat-badge">+4</div>
                 <div class="stat-icon-wrap icon-green">📋</div>
-                <div class="stat-value">24</div>
+                <div class="stat-value" id="resourcesShared">0</div>
                 <div class="stat-label">Resources Shared</div>
             </div>
+        </div>
+
+        <div class="mentor-tools">
+            <form class="tool-card" id="courseForm">
+                <h3>Create Class</h3>
+                <input id="courseTitle" placeholder="Class title" required>
+                <textarea id="courseDescription" placeholder="What will mentees learn?"></textarea>
+                <select id="courseCategory">
+                    <option value="General">General</option>
+                    <option value="Design">Design</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Leadership">Leadership</option>
+                </select>
+                <select id="courseLevel">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+                <textarea id="courseModules" placeholder="Modules, one per line. Example:&#10;Intro to Product Thinking | 20&#10;Writing a PRD | 35"></textarea>
+                <button class="btn btn-primary" type="submit">Publish Class</button>
+            </form>
+
+            <form class="tool-card" id="resourceForm">
+                <h3>Upload Resource</h3>
+                <input id="resourceTitle" placeholder="Title" required>
+                <textarea id="resourceDescription" placeholder="Description"></textarea>
+                <select id="resourceType">
+                    <option value="pdf">PDF</option>
+                    <option value="video">Video</option>
+                    <option value="doc">Document</option>
+                    <option value="xlsx">Spreadsheet</option>
+                    <option value="zip">Archive</option>
+                    <option value="other">Other</option>
+                </select>
+                <input id="resourceCategory" placeholder="Category" value="General">
+                <input id="resourceUrl" placeholder="File URL or share link">
+                <button class="btn btn-primary" type="submit">Publish Resource</button>
+            </form>
+
+            <form class="tool-card" id="assignmentForm">
+                <h3>Give Assignment</h3>
+                <input id="assignmentTitle" placeholder="Title" required>
+                <select id="assignmentCourse"></select>
+                <textarea id="assignmentInstructions" placeholder="Instructions"></textarea>
+                <input id="assignmentDue" type="datetime-local">
+                <input id="assignmentPoints" type="number" min="1" value="100" placeholder="Points">
+                <button class="btn btn-primary" type="submit">Assign to Mentees</button>
+            </form>
+
+            <form class="tool-card" id="quizForm">
+                <h3>Create Quiz</h3>
+                <input id="quizTitle" placeholder="Title" required>
+                <select id="quizCourse"></select>
+                <textarea id="quizDescription" placeholder="Description"></textarea>
+                <textarea id="quizQuestions" placeholder="Questions, one per line"></textarea>
+                <input id="quizTimeLimit" type="number" min="1" value="10" placeholder="Time limit">
+                <button class="btn btn-primary" type="submit">Publish Quiz</button>
+            </form>
         </div>
 
         <!-- Content grid -->
@@ -304,11 +390,20 @@
                     </div>
                     <button class="btn-generate" onclick="generateMessage()">Generate Message</button>
                 </div>
+
+                <div class="card" style="margin-top:1.25rem">
+                    <div class="card-header">
+                        <span class="card-title">Assignments & Quizzes</span>
+                    </div>
+                    <div class="mini-list" id="mentorTasks"></div>
+                </div>
             </div>
 
         </div>
     </div><!-- /dashboardContent -->
 </div><!-- /main -->
+
+<div class="toast" id="toast"></div>
 
 <script>
     const API_URL = 'http://localhost:8000/api'; // FastAPI backend
@@ -321,10 +416,13 @@
             window.location.href = 'login.html';
             return;
         }
+        localStorage.setItem('activeDashboard', 'mentor');
 
         try {
             const res = await fetch(`${API_URL}/dashboard/mentor`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                 }
             });
 
             if (res.status === 401) {
@@ -343,6 +441,8 @@
 
             const data = await res.json();
             renderDashboard(data);
+            await loadMentorTools();
+            bindMentorForms();
 
         } catch (err) {
             document.getElementById('loadingState').innerHTML =
@@ -352,6 +452,240 @@
                  Retry</button>`;
         }
     });
+
+    async function loadMentorTools() {
+        await Promise.all([loadCoursesForTools(), loadMentorTasks(), loadResourceStats()]);
+    }
+
+    function bindMentorForms() {
+        document.getElementById('courseForm').addEventListener('submit', createCourse);
+        document.getElementById('resourceForm').addEventListener('submit', createResource);
+        document.getElementById('assignmentForm').addEventListener('submit', createAssignment);
+        document.getElementById('quizForm').addEventListener('submit', createQuiz);
+    }
+
+    function authHeaders(extra = {}) {
+        return {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            'Content-Type': 'application/json',
+            ...extra
+        };
+    }
+
+    async function loadCoursesForTools() {
+        const res = await fetch(`${API_URL}/classrooms`, { headers: authHeaders() });
+        if (!res.ok) return;
+        const courses = await res.json();
+        const options = ['<option value="">All mentees / no course</option>']
+            .concat(courses.map(c => `<option value="${c.id}">${escapeHtml(c.title)}</option>`))
+            .join('');
+        document.getElementById('assignmentCourse').innerHTML = options;
+        document.getElementById('quizCourse').innerHTML = options;
+    }
+
+    function parseModules(value) {
+        return value
+            .split('\n')
+            .map(line => line.trim())
+            .filter(Boolean)
+            .map(line => {
+                const [title, minutes] = line.split('|').map(part => part.trim());
+                return {
+                    title,
+                    duration_minutes: Number(minutes || 0),
+                    description: null,
+                    video_url: null
+                };
+            });
+    }
+
+    async function loadMentorTasks() {
+        const [assignmentsRes, quizzesRes] = await Promise.all([
+            fetch(`${API_URL}/classrooms/assignments`, { headers: authHeaders() }),
+            fetch(`${API_URL}/classrooms/quizzes`, { headers: authHeaders() })
+        ]);
+        const assignments = assignmentsRes.ok ? await assignmentsRes.json() : [];
+        const quizzes = quizzesRes.ok ? await quizzesRes.json() : [];
+        renderMentorTasks(assignments, quizzes);
+    }
+
+    async function loadResourceStats() {
+        const res = await fetch(`${API_URL}/resources?limit=100`, { headers: authHeaders() });
+        if (!res.ok) return;
+        const resources = await res.json();
+        document.getElementById('resourcesShared').textContent =
+            resources.filter(r => r.uploader?.id === JSON.parse(localStorage.getItem('user') || '{}').id).length;
+    }
+
+    function renderMentorTasks(assignments, quizzes) {
+        const items = [
+            ...assignments.slice(0, 3).map(a => ({
+                kind: 'Assignment',
+                title: a.title,
+                meta: `${a.points || 0} pts${a.due_at ? ' · due ' + new Date(a.due_at).toLocaleDateString() : ''}`
+            })),
+            ...quizzes.slice(0, 3).map(q => ({
+                kind: 'Quiz',
+                title: q.title,
+                meta: `${q.questions?.length || 0} questions · ${q.time_limit_minutes || 0} min`
+            }))
+        ].slice(0, 5);
+
+        document.getElementById('mentorTasks').innerHTML = items.length
+            ? items.map(item => `
+                <div class="mini-item">
+                    <div class="mini-title">${item.kind}: ${escapeHtml(item.title)}</div>
+                    <div class="mini-meta">${escapeHtml(item.meta)}</div>
+                </div>`).join('')
+            : '<div class="mini-item"><div class="mini-meta">No assignments or quizzes yet.</div></div>';
+    }
+
+    async function createResource(e) {
+        e.preventDefault();
+        const payload = {
+            title: document.getElementById('resourceTitle').value.trim(),
+            description: document.getElementById('resourceDescription').value.trim(),
+            file_type: document.getElementById('resourceType').value,
+            category: document.getElementById('resourceCategory').value.trim() || 'General',
+            file_url: document.getElementById('resourceUrl').value.trim() || null,
+            is_public: true
+        };
+        try {
+            await postTool(`${API_URL}/resources`, payload, 'Resource published');
+            e.target.reset();
+            document.getElementById('resourceCategory').value = 'General';
+            await loadResourceStats();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function createCourse(e) {
+        e.preventDefault();
+        const payload = {
+            title: document.getElementById('courseTitle').value.trim(),
+            description: document.getElementById('courseDescription').value.trim(),
+            category: document.getElementById('courseCategory').value,
+            level: document.getElementById('courseLevel').value,
+            modules: parseModules(document.getElementById('courseModules').value),
+            is_published: true
+        };
+        try {
+            await postTool(`${API_URL}/classrooms`, payload, 'Class published');
+            e.target.reset();
+            document.getElementById('courseCategory').value = 'General';
+            document.getElementById('courseLevel').value = 'beginner';
+            await loadCoursesForTools();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function createAssignment(e) {
+        e.preventDefault();
+        const courseId = document.getElementById('assignmentCourse').value;
+        const due = document.getElementById('assignmentDue').value;
+        const payload = {
+            title: document.getElementById('assignmentTitle').value.trim(),
+            instructions: document.getElementById('assignmentInstructions').value.trim(),
+            course_id: courseId ? Number(courseId) : null,
+            due_at: due ? new Date(due).toISOString() : null,
+            points: Number(document.getElementById('assignmentPoints').value || 100),
+            is_published: true
+        };
+        try {
+            await postTool(`${API_URL}/classrooms/assignments`, payload, 'Assignment published');
+            e.target.reset();
+            document.getElementById('assignmentPoints').value = 100;
+            await loadMentorTasks();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function createQuiz(e) {
+        e.preventDefault();
+        const courseId = document.getElementById('quizCourse').value;
+        const questions = document.getElementById('quizQuestions').value
+            .split('\n')
+            .map(q => q.trim())
+            .filter(Boolean)
+            .map(q => ({ prompt: q, options: [], answer: null }));
+        const payload = {
+            title: document.getElementById('quizTitle').value.trim(),
+            description: document.getElementById('quizDescription').value.trim(),
+            course_id: courseId ? Number(courseId) : null,
+            questions,
+            time_limit_minutes: Number(document.getElementById('quizTimeLimit').value || 10),
+            is_published: true
+        };
+        try {
+            await postTool(`${API_URL}/classrooms/quizzes`, payload, 'Quiz published');
+            e.target.reset();
+            document.getElementById('quizTimeLimit').value = 10;
+            await loadMentorTasks();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function postTool(url, payload, successMessage) {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.detail || 'Could not save');
+        showToast(successMessage, 'success');
+    }
+
+    function focusTool(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => el.focus(), 250);
+        }
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, ch => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[ch]));
+    }
+
+    async function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        const token = localStorage.getItem('accessToken');
+        
+        try {
+            // 1. Tell the backend we are logging out
+            await fetch(`${API_URL}/logout`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (err) {
+            console.error("Backend logout failed, clearing local session anyway...", err);
+        } finally {
+            // 2. Always clear local data and redirect
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('activeDashboard');
+            window.location.href = 'login.html';
+        }
+    }
+}
 
     function renderDashboard(data) {
         const user   = data.user;

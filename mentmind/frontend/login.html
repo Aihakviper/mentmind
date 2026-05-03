@@ -596,6 +596,7 @@
                 localStorage.setItem('accessToken', data.tokens.access_token);
                 localStorage.setItem('refreshToken', data.tokens.refresh_token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+                
 
                 // Remember email if checked
                 if (rememberMeCheckbox.checked) {
@@ -604,11 +605,24 @@
                     localStorage.removeItem('rememberedEmail');
                 }
 
+                // 1. Save essential info
+            
+
+                // 2. Redirect based on role
+                localStorage.setItem(
+                    'activeDashboard',
+                    data.user.role.toLowerCase() === 'mentor' ? 'mentor' : 'mentee'
+                );
+
                 // Check if email is verified
                 if (!data.is_verified) {
                     showWarning('Please verify your email before accessing all features.');
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        if (data.user.role.toLowerCase() === 'mentor') {
+                    window.location.href = 'mentor_dashboard.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
                     }, 2000);
                     return;
                 }
@@ -616,7 +630,12 @@
                 // Success - redirect to dashboard
                 showSuccess('Login successful! Redirecting...');
                 setTimeout(() => {
+                    if (data.user.role.toLowerCase() === 'mentor') {
+                    window.location.href = 'mentor_dashboard.html';
+                } else {
                     window.location.href = 'dashboard.html';
+                }
+                    
                 }, 1000);
 
             } catch (error) {

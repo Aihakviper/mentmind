@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Forum - MentMinds</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#667eea;--accent:#8b5cf6;--secondary:#764ba2;
+            --success:#10b981;--warning:#f59e0b;--error:#ef4444;
+            --bg:#0f172a;--bg-light:#1e293b;--bg-card:#1e293b;--bg-card2:#243044;
+            --border:#334155;--text:#f1f5f9;--muted:#64748b;
+        }
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+             background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+        /* ── Sidebar ── */
+        .sidebar{width:240px;background:var(--bg-light);padding:1.5rem 1rem;
+                 display:flex;flex-direction:column;gap:.35rem;
+                 position:fixed;height:100vh;border-right:1px solid var(--border);z-index:10}
+        .logo{display:flex;align-items:center;gap:.75rem;font-size:1.15rem;font-weight:700;
+              padding:.5rem 1rem;margin-bottom:1.25rem}
+        .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--primary));
+                   border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+        .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:10px;
+                  color:var(--muted);text-decoration:none;transition:all .2s;font-size:.9rem;cursor:pointer}
+        .nav-item:hover{background:var(--bg-card2);color:var(--text)}
+        .nav-item.active{background:linear-gradient(135deg,var(--primary),var(--secondary));
+                         color:#fff;box-shadow:0 4px 12px rgba(102,126,234,.3)}
+        .nav-icon{width:18px;text-align:center;font-size:1rem}
+        .sidebar-footer{margin-top:auto;padding:.875rem;background:var(--bg-card2);
+                        border-radius:12px;display:flex;align-items:center;gap:.75rem}
+        .s-avatar{width:36px;height:36px;border-radius:50%;
+                  background:linear-gradient(135deg,var(--primary),var(--secondary));
+                  display:flex;align-items:center;justify-content:center;
+                  font-weight:700;font-size:.85rem;flex-shrink:0}
+        .s-info{flex:1;min-width:0}
+        .s-name{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .s-id{font-size:.72rem;color:var(--muted)}
+
+        /* ── Main ── */
+        .main{margin-left:240px;flex:1;padding:2rem;display:grid;
+              grid-template-columns:1fr 300px;gap:2rem;align-items:start;max-width:1300px}
+
+        /* ── Left column ── */
+        .left-col{min-width:0}
+
+        /* ── Page header ── */
+        .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+        .page-header h1{font-size:1.85rem;font-weight:700}
+        .page-header p{color:var(--muted);font-size:.9rem;margin-top:.2rem}
+        .header-right{display:flex;gap:.75rem;align-items:center}
+        .search-bar{position:relative;width:260px}
+        .search-bar input{width:100%;padding:.65rem 1rem .65rem 2.5rem;
+                          background:var(--bg-card2);border:1px solid var(--border);
+                          border-radius:10px;color:var(--text);font-size:.875rem}
+        .search-bar input:focus{outline:none;border-color:var(--primary)}
+        .search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);
+                     color:var(--muted);font-size:.875rem}
+        .btn-new{display:flex;align-items:center;gap:.5rem;padding:.65rem 1.125rem;
+                 background:linear-gradient(135deg,var(--primary),var(--secondary));
+                 border:none;border-radius:10px;color:#fff;font-size:.875rem;
+                 font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
+        .btn-new:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+
+        /* ── Category tabs ── */
+        .cat-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+        .cat-tab{padding:.45rem 1rem;border-radius:20px;border:1px solid var(--border);
+                 background:transparent;color:var(--muted);font-size:.85rem;
+                 cursor:pointer;transition:all .2s;white-space:nowrap}
+        .cat-tab:hover{border-color:var(--primary);color:var(--text)}
+        .cat-tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+
+        /* ── Topic cards ── */
+        .topic-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+                    padding:1.25rem;margin-bottom:1rem;cursor:pointer;transition:all .25s}
+        .topic-card:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(102,126,234,.15)}
+        .topic-header{display:flex;align-items:flex-start;justify-content:space-between;
+                      margin-bottom:.875rem;gap:1rem}
+        .topic-author{display:flex;align-items:center;gap:.75rem}
+        .author-avatar{width:40px;height:40px;border-radius:50%;
+                       display:flex;align-items:center;justify-content:center;
+                       font-weight:700;font-size:.875rem;flex-shrink:0;color:#fff}
+        .author-info{min-width:0}
+        .author-name{font-weight:600;font-size:.9rem}
+        .post-time{font-size:.78rem;color:var(--muted);margin-top:.1rem}
+        .cat-badge{padding:.25rem .625rem;border-radius:6px;font-size:.75rem;font-weight:600;
+                   white-space:nowrap;flex-shrink:0}
+        .badge-career{background:rgba(102,126,234,.2);color:var(--primary)}
+        .badge-tech{background:rgba(16,185,129,.2);color:var(--success)}
+        .badge-soft{background:rgba(245,158,11,.2);color:var(--warning)}
+        .badge-scholar{background:rgba(139,92,246,.2);color:var(--accent)}
+        .badge-general{background:rgba(100,116,139,.2);color:var(--muted)}
+
+        .topic-title{font-size:1rem;font-weight:600;margin-bottom:.5rem;line-height:1.4}
+        .topic-body{font-size:.875rem;color:var(--muted);line-height:1.6;
+                    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .topic-footer{display:flex;align-items:center;justify-content:space-between;
+                      margin-top:1rem;padding-top:.875rem;border-top:1px solid var(--border)}
+        .topic-stats{display:flex;gap:1.25rem}
+        .stat{display:flex;align-items:center;gap:.35rem;font-size:.8rem;color:var(--muted)}
+        .like-btn{cursor:pointer;display:flex;align-items:center;gap:.35rem;
+                  font-size:.8rem;color:var(--muted);transition:all .2s;background:none;border:none;padding:0}
+        .like-btn:hover,.like-btn.liked{color:var(--error)}
+        .join-btn{display:flex;align-items:center;gap:.35rem;padding:.4rem .875rem;
+                  background:transparent;border:1px solid var(--border);border-radius:8px;
+                  color:var(--text);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s}
+        .join-btn:hover{border-color:var(--primary);color:var(--primary)}
+
+        /* ── Loading / Empty ── */
+        .loading{text-align:center;padding:4rem;color:var(--muted)}
+        .spinner{width:40px;height:40px;border:3px solid rgba(102,126,234,.2);
+                 border-top-color:var(--primary);border-radius:50%;
+                 animation:spin .8s linear infinite;margin:0 auto 1rem}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .empty{text-align:center;padding:4rem;color:var(--muted)}
+
+        /* ── Right sidebar ── */
+        .right-col{display:flex;flex-direction:column;gap:1.25rem;position:sticky;top:2rem}
+
+        .widget{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+
+        /* Community impact */
+        .impact-widget{background:linear-gradient(135deg,#1a3a2a,#1e3d30);
+                       border-color:rgba(16,185,129,.3)}
+        .impact-header{padding:1.125rem 1.25rem .875rem;font-weight:600;font-size:.95rem}
+        .impact-stats{display:grid;grid-template-columns:1fr 1fr;
+                      gap:1rem;padding:0 1.25rem 1rem}
+        .impact-stat-val{font-size:1.75rem;font-weight:700;color:var(--success)}
+        .impact-stat-lbl{font-size:.78rem;color:rgba(255,255,255,.6);margin-top:.1rem}
+        .invite-btn{margin:0 1.25rem 1.25rem;padding:.65rem;background:rgba(16,185,129,.15);
+                    border:1px solid rgba(16,185,129,.3);border-radius:8px;color:var(--success);
+                    font-size:.85rem;font-weight:500;cursor:pointer;width:calc(100% - 2.5rem);
+                    transition:all .2s;text-align:center}
+        .invite-btn:hover{background:rgba(16,185,129,.25)}
+
+        /* Trending */
+        .widget-header{padding:1.125rem 1.25rem .75rem;font-weight:600;font-size:.9rem;
+                       display:flex;align-items:center;gap:.5rem}
+        .trending-item{padding:.75rem 1.25rem;border-top:1px solid var(--border);
+                       cursor:pointer;transition:all .2s}
+        .trending-item:hover{background:var(--bg-card2)}
+        .trending-title{font-size:.875rem;font-weight:500;margin-bottom:.2rem;line-height:1.4}
+        .trending-replies{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:.35rem}
+        .view-all-btn{padding:.875rem 1.25rem;text-align:center;font-size:.8rem;
+                      color:var(--primary);cursor:pointer;border-top:1px solid var(--border)}
+        .view-all-btn:hover{background:var(--bg-card2)}
+
+        /* AI Tip */
+        .ai-tip{background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(102,126,234,.1));
+                border-color:rgba(139,92,246,.3)}
+        .ai-tip-header{padding:1rem 1.25rem .5rem;display:flex;align-items:center;
+                       gap:.5rem;font-weight:600;font-size:.875rem;color:var(--accent)}
+        .ai-tip-text{padding:0 1.25rem 1.25rem;font-size:.82rem;color:var(--muted);line-height:1.6}
+
+        /* ── New Topic Modal ── */
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);
+                       display:flex;align-items:center;justify-content:center;
+                       z-index:1000;padding:1rem;display:none}
+        .modal-overlay.show{display:flex}
+        .modal{background:var(--bg-light);border-radius:16px;padding:2rem;
+               width:100%;max-width:560px;border:1px solid var(--border)}
+        .modal-title{font-size:1.25rem;font-weight:700;margin-bottom:1.5rem}
+        .form-group{margin-bottom:1.125rem}
+        .form-group label{display:block;font-size:.875rem;font-weight:500;margin-bottom:.5rem;color:var(--muted)}
+        .form-group input,.form-group textarea,.form-group select{
+            width:100%;padding:.75rem 1rem;background:var(--bg-card2);
+            border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.875rem;font-family:inherit}
+        .form-group input:focus,.form-group textarea:focus,.form-group select:focus{
+            outline:none;border-color:var(--primary)}
+        .form-group textarea{min-height:120px;resize:vertical}
+        .modal-actions{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem}
+        .btn-cancel{padding:.65rem 1.25rem;background:transparent;border:1px solid var(--border);
+                    border-radius:10px;color:var(--text);cursor:pointer;font-size:.875rem}
+        .btn-submit{padding:.65rem 1.5rem;background:linear-gradient(135deg,var(--primary),var(--secondary));
+                    border:none;border-radius:10px;color:#fff;font-size:.875rem;
+                    font-weight:600;cursor:pointer;transition:all .2s}
+        .btn-submit:hover{transform:translateY(-1px)}
+        .btn-submit:disabled{opacity:.5;cursor:not-allowed}
+
+        /* Toast */
+        .toast{position:fixed;bottom:2rem;right:2rem;padding:.875rem 1.5rem;
+               border-radius:10px;font-size:.875rem;font-weight:500;
+               transform:translateY(100px);opacity:0;transition:all .3s;z-index:9999}
+        .toast.show{transform:translateY(0);opacity:1}
+        .toast.success{background:var(--success);color:#fff}
+        .toast.error{background:var(--error);color:#fff}
+
+        @media(max-width:1024px){.main{grid-template-columns:1fr}.right-col{display:none}}
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo"><div class="logo-icon">🎓</div>MentMinds</div>
+    <a class="nav-item" id="dashboardLink" href="dashboard.html" onclick="goDashboard(event)"><span class="nav-icon">📊</span>Dashboard</a>
+    <a class="nav-item" id="classroomsLink" href="classrooms.html"><span class="nav-icon">🎓</span>Classrooms</a>
+    <a class="nav-item" id="mentorsLink" href="discovery.html"><span class="nav-icon">👥</span>Mentors</a>
+    <a class="nav-item active" href="forum.html"><span class="nav-icon">💬</span>Discussions</a>
+    <a class="nav-item" id="aiMentorLink" href="ai_mentor.html"><span class="nav-icon">🤖</span>AI Assistant</a>
+    <a class="nav-item" href="resources.html"><span class="nav-icon">📁</span>Resources</a>
+    <a class="nav-item" href="opportunities.html"><span class="nav-icon">🌟</span>Opportunities</a>
+    <button class="nav-item" onclick="logout()" style="border:none;background:transparent;text-align:left;width:100%">
+        <span class="nav-icon">🚪</span>Logout
+    </button>
+    <div class="sidebar-footer">
+        <div class="s-avatar" id="sAvatar">JD</div>
+        <div class="s-info">
+            <div class="s-name" id="sName">Loading...</div>
+            <div class="s-id" id="sId">ID: MM-0000</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+    <!-- Left column -->
+    <div class="left-col">
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h1>Community Forum</h1>
+                <p>Connect with fellow mentees and share knowledge.</p>
+            </div>
+            <div class="header-right">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search discussions...">
+                </div>
+                <button class="btn-new" onclick="openModal()">+ New Topic</button>
+            </div>
+        </div>
+
+        <!-- Category tabs -->
+        <div class="cat-tabs">
+            <button class="cat-tab active" data-cat="">All Topics</button>
+            <button class="cat-tab" data-cat="Career Advice">Career Advice</button>
+            <button class="cat-tab" data-cat="Technical Skills">Technical Skills</button>
+            <button class="cat-tab" data-cat="Soft Skills">Soft Skills</button>
+            <button class="cat-tab" data-cat="Scholarships">Scholarships</button>
+        </div>
+
+        <!-- Topics -->
+        <div id="loadingState" class="loading"><div class="spinner"></div><p>Loading discussions...</p></div>
+        <div id="topicsList"></div>
+        <div id="emptyState" class="empty" style="display:none">
+            <div style="font-size:2.5rem;margin-bottom:.75rem">💬</div>
+            <p>No topics found. Be the first to start a discussion!</p>
+        </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="right-col">
+        <!-- Community Impact -->
+        <div class="widget impact-widget">
+            <div class="impact-header">Community Impact</div>
+            <div class="impact-stats">
+                <div>
+                    <div class="impact-stat-val">12.4k</div>
+                    <div class="impact-stat-lbl">Members</div>
+                </div>
+                <div>
+                    <div class="impact-stat-val">850+</div>
+                    <div class="impact-stat-lbl">Mentors</div>
+                </div>
+            </div>
+            <button class="invite-btn">Invite Friends</button>
+        </div>
+
+        <!-- Trending -->
+        <div class="widget">
+            <div class="widget-header">🔥 Trending Now</div>
+            <div id="trendingList"></div>
+            <div class="view-all-btn" onclick="loadTopics()">View All Trending</div>
+        </div>
+
+        <!-- AI Mentor Tip -->
+        <div class="widget ai-tip">
+            <div class="ai-tip-header">✨ AI Mentor Tip</div>
+            <div class="ai-tip-text">
+                When asking for career advice, try to be specific about your current skills
+                and long-term goals. This helps mentors provide more actionable feedback.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Topic Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+    <div class="modal">
+        <div class="modal-title">📝 Start a New Discussion</div>
+        <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="topicTitle" placeholder="What's your question or topic?">
+        </div>
+        <div class="form-group">
+            <label>Category</label>
+            <select id="topicCategory">
+                <option value="General">General</option>
+                <option value="Career Advice">Career Advice</option>
+                <option value="Technical Skills">Technical Skills</option>
+                <option value="Soft Skills">Soft Skills</option>
+                <option value="Scholarships">Scholarships</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea id="topicBody" placeholder="Share more details about your question or topic..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-submit" id="submitBtn" onclick="createTopic()">Post Discussion</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API   = 'http://localhost:8000/api';
+const token = localStorage.getItem('accessToken');
+const user  = JSON.parse(localStorage.getItem('user') || '{}');
+
+let activeCategory = '';
+let topics = [];
+const isMentorNav = ['mentor', 'admin'].includes((user.role || '').toLowerCase()) ||
+    localStorage.getItem('activeDashboard') === 'mentor';
+
+const AVATAR_COLORS = ['#667eea','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+const CAT_BADGE = {
+    'Career Advice':   'badge-career',
+    'Technical Skills':'badge-tech',
+    'Soft Skills':     'badge-soft',
+    'Scholarships':    'badge-scholar',
+    'General':         'badge-general',
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!token) { window.location.href = 'login.html'; return; }
+
+    if (isMentorNav) {
+        document.getElementById('dashboardLink').href = 'mentor_dashboard.html';
+        document.getElementById('classroomsLink').style.display = 'none';
+        document.getElementById('mentorsLink').style.display = 'none';
+        document.getElementById('aiMentorLink').style.display = 'none';
+    }
+
+    // Sidebar
+    if (user.full_name) {
+        document.getElementById('sAvatar').textContent =
+            user.full_name.split(' ').map(n => n[0]).join('');
+        document.getElementById('sName').textContent = user.full_name;
+        document.getElementById('sId').textContent =
+            `ID: MM-${String(user.id).padStart(4,'0')}`;
+    }
+
+    await Promise.all([loadTopics(), loadTrending()]);
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', () => {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = q
+            ? topics.filter(t =>
+                t.title.toLowerCase().includes(q) ||
+                t.body.toLowerCase().includes(q))
+            : topics;
+        renderTopics(filtered);
+    });
+
+    // Category tabs
+    document.querySelectorAll('.cat-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeCategory = btn.dataset.cat;
+            loadTopics();
+        });
+    });
+});
+
+async function loadTopics() {
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('topicsList').innerHTML = '';
+
+    try {
+        const params = new URLSearchParams({ sort_by: 'latest', limit: 20 });
+        if (activeCategory) params.set('category', activeCategory);
+
+        const r = await fetch(`${API}/forum/topics?${params}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (r.status === 401) { localStorage.clear(); window.location.href = 'login.html'; return; }
+        if (!r.ok) throw new Error();
+
+        topics = await r.json();
+        document.getElementById('loadingState').style.display = 'none';
+        renderTopics(topics);
+
+    } catch {
+        document.getElementById('loadingState').innerHTML =
+            '<p style="color:var(--error)">⚠️ Failed to load discussions.</p>';
+    }
+}
+
+async function loadTrending() {
+    try {
+        const r = await fetch(`${API}/forum/trending`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!r.ok) return;
+
+        const data = await r.json();
+        document.getElementById('trendingList').innerHTML = data.map(t => `
+            <div class="trending-item" onclick="openTopic(${t.id})">
+                <div class="trending-title">${t.title}</div>
+                <div class="trending-replies">↗ ${t.reply_count} replies</div>
+            </div>
+        `).join('');
+    } catch {}
+}
+
+function renderTopics(list) {
+    const container = document.getElementById('topicsList');
+    const empty     = document.getElementById('emptyState');
+
+    if (!list.length) {
+        container.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+
+    container.innerHTML = list.map(t => {
+        const initials = t.author.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+        const colorIdx = t.author.id % AVATAR_COLORS.length;
+        const badgeClass = CAT_BADGE[t.category] || 'badge-general';
+
+        return `
+        <div class="topic-card" onclick="openTopic(${t.id})">
+            <div class="topic-header">
+                <div class="topic-author">
+                    <div class="author-avatar" style="background:${AVATAR_COLORS[colorIdx]}">${initials}</div>
+                    <div class="author-info">
+                        <div class="author-name">${t.author.full_name}</div>
+                        <div class="post-time">${t.time_ago}</div>
+                    </div>
+                </div>
+                <span class="cat-badge ${badgeClass}">${t.category}</span>
+            </div>
+            <div class="topic-title">${t.title}</div>
+            <div class="topic-body">${t.body}</div>
+            <div class="topic-footer">
+                <div class="topic-stats">
+                    <span class="stat">💬 ${t.reply_count}</span>
+                    <button class="like-btn ${t.liked_by_me ? 'liked' : ''}"
+                            onclick="toggleLike(event,${t.id})" id="like-${t.id}">
+                        ♥ <span id="lc-${t.id}">${t.like_count}</span>
+                    </button>
+                    <span class="stat">👁 ${t.views}</span>
+                </div>
+                <button class="join-btn" onclick="openTopic(${t.id},event)">💬 Join Discussion</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function toggleLike(e, topicId) {
+    e.stopPropagation();
+    try {
+        const r = await fetch(`${API}/forum/topics/${topicId}/like`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!r.ok) return;
+        const data = await r.json();
+        const btn  = document.getElementById(`like-${topicId}`);
+        const cnt  = document.getElementById(`lc-${topicId}`);
+        if (btn)  data.liked ? btn.classList.add('liked') : btn.classList.remove('liked');
+        if (cnt)  cnt.textContent = data.like_count;
+    } catch {}
+}
+
+function openTopic(id, e) {
+    if (e) e.stopPropagation();
+    window.location.href = `forum_topic.html?id=${id}`;
+}
+
+async function createTopic() {
+    const title    = document.getElementById('topicTitle').value.trim();
+    const category = document.getElementById('topicCategory').value;
+    const body     = document.getElementById('topicBody').value.trim();
+
+    if (!title) { showToast('Please enter a title', 'error'); return; }
+    if (!body)  { showToast('Please enter a description', 'error'); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled  = true;
+    btn.textContent = 'Posting...';
+
+    try {
+        const r = await fetch(`${API}/forum/topics`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, category, body })
+        });
+        const data = await r.json();
+
+        if (r.ok) {
+            showToast('Discussion posted! 🎉', 'success');
+            closeModal();
+            document.getElementById('topicTitle').value = '';
+            document.getElementById('topicBody').value  = '';
+            setTimeout(() => openTopic(data.id), 800);
+        } else {
+            showToast(data.detail || 'Failed to post', 'error');
+        }
+    } catch { showToast('Network error', 'error'); }
+
+    btn.disabled    = false;
+    btn.textContent = 'Post Discussion';
+}
+
+function openModal()  { document.getElementById('modalOverlay').classList.add('show'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModalOnBg(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
+
+function goDashboard(e) {
+    if (e) e.preventDefault();
+    const role = (JSON.parse(localStorage.getItem('user') || '{}').role || '').toLowerCase();
+    window.location.href = role === 'mentor' || role === 'admin' || localStorage.getItem('activeDashboard') === 'mentor'
+        ? 'mentor_dashboard.html'
+        : 'dashboard.html';
+}
+</script>
+</body>
+</html>

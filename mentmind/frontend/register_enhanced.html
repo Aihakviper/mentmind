@@ -650,7 +650,7 @@
 
             <!-- Alert Messages -->
             <div class="alert alert-error" id="errorAlert">
-                <span></span>
+                <span>⚠️</span>
                 <span id="errorMessage"></span>
             </div>
 
@@ -871,7 +871,12 @@
 
     <script>
         // Configuration
-        const API_URL = 'http://127.0.0.1:8000/main'; // FastAPI backend
+        
+        // ── API URL helper ──────────────────────────────────────────────
+        // Always points to FastAPI at localhost:8000
+        // Open this file via Live Server (port 5500), NOT via file://
+        const API_URL = 'http://localhost:8000/api';
+        // ────────────────────────────────────────────────────────────────
 
         // State
         let currentStep = 1;
@@ -1070,6 +1075,7 @@
             registrationData = {
                 email,
                 password,
+                confirm_password: document.getElementById('confirmPassword').value,
                 full_name: fullName,
                 role: selectedRole,
                 location,
