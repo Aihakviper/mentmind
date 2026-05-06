@@ -11,7 +11,7 @@ from datetime import datetime
 # ─────────────────────────────────────────────
 
 class RegisterRequest(BaseModel):
-     email: EmailStr
+    email: EmailStr
     full_name: str
     password: str
     confirm_password: str
