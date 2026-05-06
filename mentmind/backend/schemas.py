@@ -11,7 +11,7 @@ from datetime import datetime
 # ─────────────────────────────────────────────
 
 class RegisterRequest(BaseModel):
-    email: EmailStr
+     email: EmailStr
     full_name: str
     password: str
     confirm_password: str
@@ -19,9 +19,12 @@ class RegisterRequest(BaseModel):
     phone: Optional[str] = None
     location: Optional[str] = None
     bio: Optional[str] = None
+    industry: Optional[str] = None
     areas_of_interest: Optional[List[str]] = []  # for mentee
     expertise_areas: Optional[List[str]] = []    # for mentor
+    current_skills: Optional[List[str]] = []      # currently captured for matching/onboarding
     organization_name: Optional[str] = None      # for partner
+
 
     @field_validator("role")
     @classmethod
