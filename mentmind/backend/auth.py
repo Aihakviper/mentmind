@@ -358,4 +358,3 @@ def logout(current_user: User = Depends(get_current_user)):
     If you need server-side blacklisting, add a token blocklist table later.
     """
     return MessageResponse(message="Logged out successfully.")
-0
