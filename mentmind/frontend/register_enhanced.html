@@ -363,6 +363,12 @@
             margin-top: 0.5rem;
         }
 
+        .checkbox-group.option-list {
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
         .checkbox-item {
             position: relative;
         }
@@ -774,41 +780,22 @@
 
                         <div class="form-group">
                             <label>Areas of Interest * (Select 1-5)</label>
-                            <div class="checkbox-group">
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="tech" value="Technology">
-                                    <label for="tech" class="checkbox-label">Technology</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="leadership" value="Leadership">
-                                    <label for="leadership" class="checkbox-label">Leadership</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="design" value="Design">
-                                    <label for="design" class="checkbox-label">Design</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="marketing" value="Marketing">
-                                    <label for="marketing" class="checkbox-label">Marketing</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="entrepreneurship" value="Entrepreneurship">
-                                    <label for="entrepreneurship" class="checkbox-label">Entrepreneurship</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="social" value="Social Impact">
-                                    <label for="social" class="checkbox-label">Social Impact</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="product" value="Product Management">
-                                    <label for="product" class="checkbox-label">Product Management</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="data" value="Data Science">
-                                    <label for="data" class="checkbox-label">Data Science</label>
-                                </div>
-                            </div>
+                            <div class="checkbox-group option-list" id="interestOptions"></div>
                             <div class="field-error">Please select 1-5 areas of interest</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Current Skills (Optional)</label>
+                            <div class="checkbox-group option-list" id="skillOptions"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="industry">Industry *</label>
+                            <span class="input-icon">🏢</span>
+                            <select id="industry" required>
+                                <option value="">Select industry</option>
+                            </select>
+                            <div class="field-error">Please select your industry</div>
                         </div>
                     </div>
                 </form>
@@ -875,13 +862,83 @@
         // ── API URL helper ──────────────────────────────────────────────
         // Always points to FastAPI at localhost:8000
         // Open this file via Live Server (port 5500), NOT via file://
-        const API_URL = 'https://mentmind.onrender.com/api';
+        const API_URL = 'http://localhost:8000/api';
         // ────────────────────────────────────────────────────────────────
 
         // State
         let currentStep = 1;
         let selectedRole = null;
         let registrationData = {};
+
+        const matchingDomains = [
+            'Artificial Intelligence',
+            'Machine Learning',
+            'Data Science',
+            'Software Engineering',
+            'Cybersecurity',
+            'Cloud Computing',
+            'Product Management',
+            'Entrepreneurship',
+            'Leadership',
+            'Career Development',
+            'Research',
+            'Public Policy',
+            'Civic Engagement',
+            'Governance',
+            'Advocacy',
+            'Sustainability',
+            'Climate Tech',
+            'Digital Marketing',
+            'Creative Writing',
+            'Public Speaking'
+        ];
+
+        const matchingSkills = [
+            'Python',
+            'JavaScript',
+            'SQL',
+            'Data Analysis',
+            'Machine Learning',
+            'Deep Learning',
+            'Statistics',
+            'Research',
+            'Writing',
+            'Public Speaking',
+            'Project Management',
+            'Product Management',
+            'Leadership',
+            'Community Organizing',
+            'Policy Analysis',
+            'Advocacy',
+            'Grant Writing',
+            'Entrepreneurship',
+            'Marketing',
+            'Graphic Design',
+            'Video Editing',
+            'Content Creation'
+        ];
+
+        const matchingIndustries = [
+            ['Technology', 'Technology'],
+            ['Artificial Intelligence', 'Artificial Intelligence'],
+            ['Finance', 'Finance'],
+            ['Fintech', 'Fintech'],
+            ['Healthcare', 'Healthcare'],
+            ['Education', 'Education'],
+            ['Government', 'Government / Policy'],
+            ['Nonprofit', 'Nonprofit / Social Impact'],
+            ['Agriculture', 'Agriculture / Agritech'],
+            ['Energy', 'Energy'],
+            ['Environmental', 'Environment / Sustainability'],
+            ['Media', 'Media / Journalism'],
+            ['Creative', 'Creative Arts'],
+            ['Marketing', 'Marketing / Sales'],
+            ['Business', 'Business / Entrepreneurship'],
+            ['Consulting', 'Consulting'],
+            ['Law', 'Law / Legal'],
+            ['Research', 'Research / Academia'],
+            ['Public Health', 'Public Health']
+        ];
 
         // Elements
         const steps = document.querySelectorAll('.step');
@@ -897,8 +954,34 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            renderMatchingOptions();
             setupEventListeners();
         });
+
+        function toOptionId(prefix, value) {
+            return `${prefix}-${value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+        }
+
+        function renderCheckboxOptions(containerId, values, name, prefix) {
+            document.getElementById(containerId).innerHTML = values.map(value => {
+                const id = toOptionId(prefix, value);
+                return `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="${id}" name="${name}" value="${value}">
+                        <label for="${id}" class="checkbox-label">${value}</label>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderMatchingOptions() {
+            renderCheckboxOptions('interestOptions', matchingDomains, 'areasOfInterest', 'interest');
+            renderCheckboxOptions('skillOptions', matchingSkills, 'currentSkills', 'skill');
+
+            document.getElementById('industry').innerHTML = '<option value="">Select industry</option>' +
+                matchingIndustries.map(([value, label]) =>
+                    `<option value="${value}">${label}</option>`
+                ).join('');
+        }
 
         function setupEventListeners() {
             // Role selection
@@ -1028,12 +1111,15 @@
             const location = document.getElementById('location').value;
             const phone = document.getElementById('phone').value.trim();
             const bio = document.getElementById('bio').value.trim();
+            const industry = document.getElementById('industry').value;
 
             // Get selected interests
-            const interests = [];
-            document.querySelectorAll('.checkbox-item input:checked').forEach(cb => {
-                interests.push(cb.value);
-            });
+            const interests = Array.from(
+                document.querySelectorAll('input[name="areasOfInterest"]:checked')
+            ).map(cb => cb.value);
+            const skills = Array.from(
+                document.querySelectorAll('input[name="currentSkills"]:checked')
+            ).map(cb => cb.value);
 
             // Validation
             let isValid = true;
@@ -1062,6 +1148,11 @@
                 isValid = false;
             }
 
+            if (!industry) {
+                showFieldError('industry', 'Please select your industry');
+                isValid = false;
+            }
+
             if (interests.length === 0 || interests.length > 5) {
                 showError('Please select 1-5 areas of interest');
                 isValid = false;
@@ -1081,7 +1172,10 @@
                 location,
                 phone,
                 bio,
-                areas_of_interest: interests
+                industry,
+                areas_of_interest: interests,
+                expertise_areas: selectedRole === 'mentor' ? (skills.length ? skills : interests) : [],
+                current_skills: skills
             };
 
             // Show loading
